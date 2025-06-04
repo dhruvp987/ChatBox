@@ -23,16 +23,22 @@ def main():
         verbose=False
     )
 
+    chat = []
+
     while True:
         prompt = input(f'Enter your prompt ({EXIT_STR} to exit): ')
         if prompt == EXIT_STR:
             break
 
-        print(llm.create_chat_completion(
-            messages = [
-                {'role': 'user', 'content': prompt}
-            ]
-        )['choices'][0]['message']['content'], '\n')
+        chat.append({'role': 'user', 'content': prompt})
+
+        output = llm.create_chat_completion(
+            messages = chat
+        )['choices'][0]['message']['content']
+
+        print(output, '\n')
+
+        chat.append({'role': 'assistant', 'content': output})
 
 
 if __name__ == "__main__":

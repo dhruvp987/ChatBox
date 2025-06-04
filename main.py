@@ -5,9 +5,11 @@ from llama_cpp import Llama
 # it easier to work with for now
 MAX_CTX = 2048
 
-MAX_CMD_ARGS = 3
+EXIT_STR = '/exit'
+
+MAX_CMD_ARGS = 2
 def usage_msg():
-    return 'usage: chatbox model_path prompt'
+    return 'usage: chatbox model_path'
 
 
 def main():
@@ -21,11 +23,16 @@ def main():
         verbose=False
     )
 
-    print(llm.create_chat_completion(
-        messages = [
-            {'role': 'user', 'content': sys.argv[2]}
-        ]
-    )['choices'][0]['message']['content'])
+    while True:
+        prompt = input(f'Enter your prompt ({EXIT_STR} to exit): ')
+        if prompt == EXIT_STR:
+            break
+
+        print(llm.create_chat_completion(
+            messages = [
+                {'role': 'user', 'content': prompt}
+            ]
+        )['choices'][0]['message']['content'], '\n')
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 import sys
-from llama_cpp import Llama
+from llamacppllm import LlamaCppLlm
 
 # A context window that doesn't take too much resources, making
 # it easier to work with for now
@@ -17,28 +17,13 @@ def main():
         print(usage_msg(), file=sys.stderr)
         sys.exit(1)
 
-    llm = Llama(
-        model_path=sys.argv[1],
-        n_ctx=MAX_CTX,
-        verbose=False
-    )
-
-    chat = []
+    llm = LlamaCppLlm(sys.argv[1], MAX_CTX)
 
     while True:
         prompt = input(f'Enter your prompt ({EXIT_STR} to exit): ')
         if prompt == EXIT_STR:
             break
-
-        chat.append({'role': 'user', 'content': prompt})
-
-        output = llm.create_chat_completion(
-            messages = chat
-        )['choices'][0]['message']['content']
-
-        print(output, '\n')
-
-        chat.append({'role': 'assistant', 'content': output})
+        print(llm.chat(prompt), '\n')
 
 
 if __name__ == "__main__":

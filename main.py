@@ -7,7 +7,7 @@ from llamacppllm import LlamaCppLlm
 
 # A context window that doesn't take too much resources, making
 # it easier to work with for now
-MAX_CTX = 2048
+MAX_CTX = 4096
 
 
 def print_err(msg):

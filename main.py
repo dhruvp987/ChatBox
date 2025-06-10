@@ -1,6 +1,7 @@
 import os
 import sys
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from llamacppllm import LlamaCppLlm
 
@@ -18,6 +19,17 @@ class Prompt(BaseModel):
 
 
 app = FastAPI()
+
+origins = [
+    'http://127.0.0.1:8080'
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_methods=['*'],
+    allow_headers=['*']
+)
 
 model_path = os.getenv('MODEL_PATH', '')
 if model_path == '':
@@ -37,4 +49,4 @@ async def root():
 
 @app.post('/chat')
 async def chat(prmt: Prompt):
-    return llm.chat(prmt.prompt)
+    return {'completion': llm.chat(prmt.prompt)}

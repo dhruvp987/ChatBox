@@ -5,15 +5,25 @@ const SBMT_CHAT_BTN_ID = 'submit-chat-button';
 const USER_CHAT_CLASS = 'chat__user';
 const LLM_CHAT_CLASS = 'chat__llm';
 
+const CHAT_URL = 'http://127.0.0.1:8000/chat';
+
 async function llmChatComp(text) {
-    return 'I am working on it';
+    const res = await fetch(CHAT_URL, {
+        method: 'post',
+	headers: {
+            'Content-Type': 'application/json'
+	},
+	body: JSON.stringify({ prompt: text })
+    });
+    const json = await res.json();
+    return json.completion;
 }
 
 function addChat(text, chatClass, chatCont) {
-    const userChat = document.createElement('p');
-    userChat.textContent = text;
-    userChat.className = chatClass;
-    chatCont.appendChild(userChat);
+    const chat = document.createElement('p');
+    chat.textContent = text;
+    chat.className = chatClass;
+    chatCont.appendChild(chat);
 }
 
 async function submitUserChat(userText, chatCont) {

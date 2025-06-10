@@ -1,8 +1,28 @@
 from llama_cpp import Llama
 
+class LlamaCppChats:
+    USER_ROLE = 'user'
+    LLM_ROLE = 'assistant'
+
+    def __init__(self):
+        self._chats = []
+
+
+    @property
+    def chats(self):
+        return self._chats
+
+
+    def add(self, role, text):
+        self.chats.append({'role': role, 'content': text})
+
+    
+    def append(self, chat):
+        self.chats.append(chat)
+
+
 class LlamaCppLlm:
     def __init__(self, mdl_path, ctx_size):
-        self.chats = []
         self.llm = Llama(
             model_path=mdl_path,
             n_gpu_layers=-1,
@@ -11,10 +31,11 @@ class LlamaCppLlm:
         )
 
 
-    def chat(self, prompt):
-        self.chats.append({'role': 'user', 'content': prompt})
+    def chat(self, chats, prompt):
+        chats.add(LlamaCppChats.USER_ROLE, prompt)
         output = self.llm.create_chat_completion(
-            messages=self.chats
+            messages=chats.chats
         )['choices'][0]['message']
-        self.chats.append(output)
+        chats.append(output)
         return output['content']
+

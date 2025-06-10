@@ -3,7 +3,7 @@ import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from llamacppllm import LlamaCppLlm
+from llamacppllm import LlamaCppChats, LlamaCppLlm
 
 # A context window that doesn't take too much resources, making
 # it easier to work with for now
@@ -40,6 +40,7 @@ if model_path == '':
 # otherwise the LLM will be loaded multiple times and use
 # excessive resources
 llm = LlamaCppLlm(model_path, MAX_CTX)
+chats = LlamaCppChats()
 
 
 @app.get('/')
@@ -49,4 +50,4 @@ async def root():
 
 @app.post('/chat')
 async def chat(prmt: Prompt):
-    return {'completion': llm.chat(prmt.prompt)}
+    return {'completion': llm.chat(chats, prmt.prompt)}

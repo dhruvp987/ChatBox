@@ -5,6 +5,7 @@ class LlamaCppLlm:
         self.chats = []
         self.llm = Llama(
             model_path=mdl_path,
+            n_gpu_layers=-1,
             n_ctx=ctx_size,
             verbose=False
         )

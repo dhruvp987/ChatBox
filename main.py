@@ -1,4 +1,5 @@
 import os
+import platform
 import sys
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,6 +36,12 @@ model_path = os.getenv('MODEL_PATH', '')
 if model_path == '':
     print_err('MODEL_PATH env is not set')
     sys.exit(1)
+
+# Windows sometimes struggles with opening large files.
+# Pre-warming the model file should help Windows prepare to load the model.
+if platform.system() == 'Windows':
+    with open(model_path, 'rb') as f:
+        f.read(4096)
 
 # If using fastapi dev, make sure the --no-reload option is set,
 # otherwise the LLM will be loaded multiple times and use

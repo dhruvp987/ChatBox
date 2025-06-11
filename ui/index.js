@@ -11,7 +11,7 @@ const CHAT_URL = 'ws://127.0.0.1:8000/chat';
 
 function addChat(mdText, chatClass, chatCont) {
     const chat = document.createElement('div');
-    chat.innerHTML = marked.parse(mdText);
+    chat.innerHTML = DOMPurify.sanitize(marked.parse(mdText));
     chat.className = chatClass;
     chatCont.appendChild(chat);
 }

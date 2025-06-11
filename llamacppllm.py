@@ -31,11 +31,9 @@ class LlamaCppLlm:
         )
 
 
-    def chat(self, chats, prompt):
-        chats.add(LlamaCppChats.USER_ROLE, prompt)
+    def chat(self, chats):
         output = self.llm.create_chat_completion(
             messages=chats.chats
         )['choices'][0]['message']
-        chats.append(output)
         return output['content']
 

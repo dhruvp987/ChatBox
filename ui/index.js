@@ -7,19 +7,7 @@ const SBMT_CHAT_BTN_ID = 'submit-chat-button';
 const USER_CHAT_CLASS = 'chat__user';
 const LLM_CHAT_CLASS = 'chat__llm';
 
-const CHAT_URL = 'http://127.0.0.1:8000/chat';
-
-async function llmChatComp(text) {
-    const res = await fetch(CHAT_URL, {
-        method: 'post',
-	headers: {
-            'Content-Type': 'application/json'
-	},
-	body: JSON.stringify({ prompt: text })
-    });
-    const json = await res.json();
-    return json.completion;
-}
+const CHAT_URL = 'ws://127.0.0.1:8000/chat';
 
 function addChat(mdText, chatClass, chatCont) {
     const chat = document.createElement('div');
@@ -28,18 +16,19 @@ function addChat(mdText, chatClass, chatCont) {
     chatCont.appendChild(chat);
 }
 
-async function submitUserChat(userText, chatCont) {
-    addChat(userText, USER_CHAT_CLASS, chatCont);
-    const llmText = await llmChatComp(userText);
-    addChat(llmText, LLM_CHAT_CLASS, chatCont);
-}
-
 const chatCont = document.getElementById(CHAT_CONT_ID);
 const promptInput = document.getElementById(PROMPT_INPUT_ID);
 
+const chatWs = new WebSocket(CHAT_URL);
+chatWs.onmessage = (evnt) => {
+    addChat(evnt.data, LLM_CHAT_CLASS, chatCont);
+};
+
 const submitChatButton = document.getElementById(SBMT_CHAT_BTN_ID);
 submitChatButton.addEventListener('click', () => {
-    const text = promptInput.value;
-    submitUserChat(text, chatCont);
+    const userText = promptInput.value;
+    addChat(userText, USER_CHAT_CLASS, chatCont);
+    chatWs.send(userText);
     promptInput.value = '';
 });
+

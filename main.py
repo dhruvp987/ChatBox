@@ -1,6 +1,6 @@
 import os
 import sys
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from llamacppllm import LlamaCppChats, LlamaCppLlm
@@ -40,7 +40,6 @@ if model_path == '':
 # otherwise the LLM will be loaded multiple times and use
 # excessive resources
 llm = LlamaCppLlm(model_path, MAX_CTX)
-chats = LlamaCppChats()
 
 
 @app.get('/')
@@ -48,6 +47,14 @@ async def root():
     return 'Welcome to ChatBox'
 
 
-@app.post('/chat')
-async def chat(prmt: Prompt):
-    return {'completion': llm.chat(chats, prmt.prompt)}
+@app.websocket('/chat')
+async def chat(ws: WebSocket):
+    await ws.accept()
+    chats = LlamaCppChats()
+    while True:
+        prompt = await ws.receive_text()
+        chats.add(LlamaCppChats.USER_ROLE, prompt)
+        response = llm.chat(chats)
+        chats.add(LlamaCppChats.LLM_ROLE, response)
+        await ws.send_text(response)
+

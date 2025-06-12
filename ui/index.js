@@ -7,9 +7,10 @@ const SBMT_CHAT_BTN_ID = 'submit-chat-button';
 const USER_CHAT_CLASS = 'chat__user';
 const LLM_CHAT_CLASS = 'chat__llm';
 
+const CONN_URL = 'ws://127.0.0.1:8000/connection';
 const CHAT_URL = 'ws://127.0.0.1:8000/chat';
 
-const CHAT_ID_PREFIX = 'chat-';
+const CLIENT_ID_KEY = 'clientId';
 
 function createChatStore(chatClass, chatCont, chatId = null) {
     const chatStore = document.createElement('div');
@@ -28,35 +29,35 @@ function addChat(mdText, chatClass, chatCont) {
     fillChatStore(chatStore, mdText);
 }
 
-const llmChats = {};
+function loadChunk(chunk, chunkedText, chatStore) {
+    chunkedText.text += chunk;
+    fillChatStore(chatStore, chunkedText.text);
+}
 
 const chatCont = document.getElementById(CHAT_CONT_ID);
 const promptInput = document.getElementById(PROMPT_INPUT_ID);
 
-const chatWs = new WebSocket(CHAT_URL);
-chatWs.onmessage = (evnt) => {
-    const payload = JSON.parse(evnt.data);
-    const chatId = CHAT_ID_PREFIX + payload.chatId;
+const connWs = new WebSocket(CONN_URL);
+connWs.onmessage = (evnt) => {
+    sessionStorage.setItem(CLIENT_ID_KEY, evnt.data);
+}
 
-    let chatStore = document.getElementById(chatId);
-    if (chatStore === null) {
-        chatStore = createChatStore(LLM_CHAT_CLASS, chatCont, chatId);
-    }
-
-    if (llmChats[chatId] === undefined) {
-        llmChats[chatId] = '';
-    }
-
-    const currentText = llmChats[chatId] + payload.chunk;
-    fillChatStore(chatStore, currentText);
-    llmChats[chatId] = currentText;
-};
+let chatWs = null;
 
 const submitChatButton = document.getElementById(SBMT_CHAT_BTN_ID);
 submitChatButton.addEventListener('click', () => {
     const userText = promptInput.value;
     addChat(userText, USER_CHAT_CLASS, chatCont);
-    chatWs.send(userText);
     promptInput.value = '';
+
+    const chunkedText = { text: '' };
+    const chatStore = createChatStore(LLM_CHAT_CLASS, chatCont);
+
+    chatWs = new WebSocket(CHAT_URL);
+    chatWs.onmessage = (evnt) => loadChunk(evnt.data, chunkedText, chatStore);
+    chatWs.onopen = (evnt) => chatWs.send(JSON.stringify({
+        clientId: sessionStorage.getItem(CLIENT_ID_KEY),
+        prompt: userText
+    }));
 });
 

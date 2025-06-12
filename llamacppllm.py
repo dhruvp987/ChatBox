@@ -7,18 +7,22 @@ class LlamaCppChats:
     def __init__(self):
         self._chats = []
 
-
     @property
     def chats(self):
         return self._chats
-
+    
+    @property
+    def length(self):
+        return len(self.chats)
 
     def add(self, role, text):
         self.chats.append({'role': role, 'content': text})
-
     
     def append(self, chat):
         self.chats.append(chat)
+
+    def update_content(self, index, content):
+        self.chats[i]['content'] = content
 
 
 class LlamaCppLlm:

@@ -32,8 +32,12 @@ class LlamaCppLlm:
 
 
     def chat(self, chats):
-        output = self.llm.create_chat_completion(
-            messages=chats.chats
-        )['choices'][0]['message']
-        return output['content']
+        stream = self.llm.create_chat_completion(
+            messages=chats.chats,
+            stream=True
+        )
+        for chunk in stream:
+            delta = chunk['choices'][0]['delta']
+            if 'content' in delta:
+                yield delta['content']
 

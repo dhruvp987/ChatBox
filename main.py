@@ -1,6 +1,9 @@
+import asyncio
+import json
 import os
 import platform
 import sys
+import uuid
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -61,7 +64,18 @@ async def chat(ws: WebSocket):
     while True:
         prompt = await ws.receive_text()
         chats.add(LlamaCppChats.USER_ROLE, prompt)
-        response = llm.chat(chats)
-        chats.add(LlamaCppChats.LLM_ROLE, response)
-        await ws.send_text(response)
+
+        res_stream = llm.chat(chats)
+        res_chunks = []
+
+        chat_id = str(uuid.uuid4())
+
+        for chunk in res_stream:
+            res_chunks.append(chunk)
+            payload = {'chatId': chat_id, 'chunk': chunk}
+            await ws.send_text(json.dumps(payload))
+            # Helps make the payload actually sent before moving on
+            await asyncio.sleep(0)
+
+        chats.add(LlamaCppChats.LLM_ROLE, ''.join(res_chunks))
 

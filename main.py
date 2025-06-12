@@ -6,7 +6,6 @@ import sys
 import uuid
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
 from llamacppllm import LlamaCppChats, LlamaCppLlm
 
 # A context window that doesn't take too much resources, making

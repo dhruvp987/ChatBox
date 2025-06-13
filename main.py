@@ -4,8 +4,9 @@ import os
 import platform
 import sys
 import uuid
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Annotated
 from llamacppllm import LlamaCppChats, LlamaCppLlm
 
 # A context window that doesn't take too much resources, making
@@ -89,4 +90,12 @@ async def chat(ws: WebSocket):
     finally:
         if len(chunks) > 0:
             chats.add(LlamaCppChats.LLM_ROLE, ''.join(chunks))
+
+
+@app.post('/clear')
+async def clear(authorization: Annotated[str | None, Header()] = None):
+    if authorization is None or authorization not in chat_histories:
+        raise HTTPException(status_code=401)
+    else:
+        chat_histories[authorization] = LlamaCppChats()
 

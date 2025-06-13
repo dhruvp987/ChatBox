@@ -4,12 +4,14 @@ const CHAT_CONT_ID = 'chat-container';
 const PROMPT_INPUT_ID = 'prompt-input';
 const SBMT_CHAT_BTN_ID = 'submit-chat-button';
 const CNCL_CHAT_BTN_ID = 'cancel-chat-button';
+const CLR_CHAT_BTN_ID = 'clear-chat-button';
 
 const USER_CHAT_CLASS = 'chat__user';
 const LLM_CHAT_CLASS = 'chat__llm';
 
 const CONN_URL = 'ws://127.0.0.1:8000/connection';
 const CHAT_URL = 'ws://127.0.0.1:8000/chat';
+const CLEAR_CHAT_URL = 'http://127.0.0.1:8000/clear';
 
 const CLIENT_ID_KEY = 'clientId';
 
@@ -69,3 +71,15 @@ cancelChatButton.addEventListener('click', () => {
 	chatWs = null;
     }
 });
+
+const clearChatButton = document.getElementById(CLR_CHAT_BTN_ID);
+clearChatButton.addEventListener('click', async () => {
+    await fetch(CLEAR_CHAT_URL, {
+        method: 'post',
+	headers: {
+            'Authorization': sessionStorage.getItem(CLIENT_ID_KEY)
+	}
+    });
+    chatCont.innerHTML = '';
+});
+

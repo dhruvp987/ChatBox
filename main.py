@@ -87,5 +87,6 @@ async def chat(ws: WebSocket):
     except:
         pass
     finally:
-        chats.add(LlamaCppChats.LLM_ROLE, ''.join(chunks))
+        if len(chunks) > 0:
+            chats.add(LlamaCppChats.LLM_ROLE, ''.join(chunks))
 

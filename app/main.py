@@ -4,8 +4,10 @@ import os
 import platform
 import sys
 import uuid
-from fastapi import FastAPI, Header, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Header, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from typing import Annotated
 from llamacppllm import LlamaCppChats, LlamaCppLlm
 
@@ -20,16 +22,9 @@ def print_err(msg):
 
 app = FastAPI()
 
-origins = [
-    'http://127.0.0.1:8080'
-]
+app.mount('/static', StaticFiles(directory='static'), name='static')
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_methods=['*'],
-    allow_headers=['*']
-)
+templates = Jinja2Templates(directory='templates')
 
 model_path = os.getenv('MODEL_PATH', '')
 if model_path == '':
@@ -50,9 +45,9 @@ llm = LlamaCppLlm(model_path, MAX_CTX)
 chat_histories = {}
 
 
-@app.get('/')
-async def root():
-    return 'Welcome to ChatBox'
+@app.get('/', response_class=HTMLResponse)
+async def index(req: Request):
+    return templates.TemplateResponse(request=req, name='index.html')
 
 
 @app.websocket('/connection')

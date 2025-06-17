@@ -98,7 +98,7 @@ class StateParser {
         const tokens = combChunk.split(' ');
 	for (let i = 0; i < tokens.length; i++) {
             const exists = this.trie.exists(tokens[i]);
-	    if (exists === null and i === tokens.length - 1) {
+	    if (exists === null && i === tokens.length - 1) {
                 this.chunk = tokens[i];
 	    } else {
                 this.state = this.state.next(tokens[i]);

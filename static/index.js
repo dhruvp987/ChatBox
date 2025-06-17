@@ -13,6 +13,8 @@ const CLEAR_CHAT_URL = 'http://127.0.0.1:8000/clear';
 
 const CLIENT_ID_KEY = 'clientId';
 
+const TOKENS = ['<think>', '</think>'];
+
 function createChatStore(chatClass, chatCont, chatId = null) {
     const chatStore = document.createElement('div');
     if (chatId !== null) chatStore.id = chatId;
@@ -33,6 +35,76 @@ function addChat(mdText, chatClass, chatCont) {
 function loadChunk(chunk, chunkedText, chatStore) {
     chunkedText.text += chunk;
     fillChatStore(chatStore, chunkedText.text);
+}
+
+class Node {
+    constructor() {
+        this.chs = {};
+        this.terminal = null;
+    }
+}
+
+class Trie {
+    constructor(strs) {
+        this.start = new Node();
+	for (const str of strs) {
+            this.add(str);
+	}
+    }
+
+    add(str) {
+	let curNode = this.start;
+        for (const chr of str) {
+            if (!(curNode.chs.hasOwnProperty(chr))) {
+		curNode.chs[chr] = new Node();
+	    }
+            curNode = curNode.chs[chr];
+	}
+	curNode.terminal = str;
+    }
+
+    /*
+     * Returns true if str starting at index exists in trie, false if it 
+     * doesn't, or null if it partially exists.
+     */
+    exists(str) {
+        let curNode = this.start;
+	for (const chr of str) {
+            if (!(curNode.chs.hasOwnProperty(chr))) {
+                return false;
+	    }
+	    curNode = curNode.chs[chr];
+	}
+	if (str !== curNode.terminal) {
+            return null;
+	}
+	return true;
+    }
+}
+
+class StateParser {
+    constructor(chatCont) {
+        this.chatCont = chatCont;
+	
+	// this.state = new InactiveState();
+	
+	this.chunk = '';
+
+	this.trie = new Trie(TOKENS);
+    }
+
+    parse(chunk) {
+	const combChunk = this.chunk + chunk;
+        const tokens = combChunk.split(' ');
+	for (let i = 0; i < tokens.length; i++) {
+            const exists = this.trie.exists(tokens[i]);
+	    if (exists === null and i === tokens.length - 1) {
+                this.chunk = tokens[i];
+	    } else {
+                this.state = this.state.next(tokens[i]);
+	    }
+	}
+    }
 }
 
 const chatCont = document.getElementById(CHAT_CONT_ID);

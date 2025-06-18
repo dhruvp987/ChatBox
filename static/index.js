@@ -13,7 +13,9 @@ const CLEAR_CHAT_URL = 'http://127.0.0.1:8000/clear';
 
 const CLIENT_ID_KEY = 'clientId';
 
-const TOKENS = ['<think>', '</think>'];
+const THINK_TOK = '<think>\n';
+const THINK_END_TOK = '\n</think>';
+const TOKENS = [THINK_TOK, THINK_END_TOK];
 
 function createChatStore(chatClass, chatCont, chatId = null) {
     const chatStore = document.createElement('div');
@@ -37,7 +39,7 @@ function loadChunk(chunk, chunkedText, chatStore) {
     fillChatStore(chatStore, chunkedText.text);
 }
 
-class Node {
+class TrieNode {
     constructor() {
         this.chs = {};
         this.terminal = null;
@@ -46,66 +48,103 @@ class Node {
 
 class Trie {
     constructor(strs) {
-        this.start = new Node();
+        this.start = new TrieNode();
 	for (const str of strs) {
             this.add(str);
 	}
+    }
+
+    root() {
+        return this.start;
     }
 
     add(str) {
 	let curNode = this.start;
         for (const chr of str) {
             if (!(curNode.chs.hasOwnProperty(chr))) {
-		curNode.chs[chr] = new Node();
+		curNode.chs[chr] = new TrieNode();
 	    }
             curNode = curNode.chs[chr];
 	}
 	curNode.terminal = str;
     }
+}
 
-    /*
-     * Returns true if str starting at index exists in trie, false if it 
-     * doesn't, or null if it partially exists.
-     */
-    exists(str) {
-        let curNode = this.start;
-	for (const chr of str) {
-            if (!(curNode.chs.hasOwnProperty(chr))) {
-                return false;
-	    }
-	    curNode = curNode.chs[chr];
+class TrieIter {
+    constructor(rootNode) {
+        this.root = rootNode;
+	this.curNode = this.root;
+    }
+
+    next(chr) {
+        if (!(this.curNode.chs.hasOwnProperty(chr))) {
+            this.curNode = this.root;
+	    return false;
 	}
-	if (str !== curNode.terminal) {
-            return null;
+	this.curNode = this.curNode.chs[chr];
+	return this.curNode.terminal;
+    }
+}
+
+class ResponseState {
+    constructor(chatCont) {
+	this.chatCont = chatCont;
+        this.chatStore = null;
+	this.chat = '';
+    }
+
+    next(token) {
+        if (token === THINK_TOK) {
+            return new ThinkingState(this.chatCont);
 	}
-	return true;
+	if (this.chatStore === null) {
+            this.chatStore = createChatStore(LLM_CHAT_CLASS, chatCont);
+	}
+	this.chat += token;
+	fillChatStore(this.chatStore, this.chat);
+	return this;
+    }
+}
+
+class ThinkingState {
+    constructor(chatCont) {
+        this.chatCont = chatCont;
+	this.chatStore = createChatStore(LLM_CHAT_CLASS, chatCont);
+	this.chat = '';
+    }
+
+    next(token) {
+        if (token === THINK_END_TOK) {
+            return new ResponseState(chatCont);
+	}
+	this.chat += token;
+	fillChatStore(this.chatStore, this.chat);
+	return this;
     }
 }
 
 class StateParser {
-    constructor(chatCont) {
+    constructor(chatCont, trieIter) {
         this.chatCont = chatCont;
-	
-	// this.state = new InactiveState();
-	
+	this.state = new ResponseState(chatCont);
+	this.trieIter = trieIter;
 	this.chunk = '';
-
-	this.trie = new Trie(TOKENS);
     }
 
     parse(chunk) {
-	const combChunk = this.chunk + chunk;
-        const tokens = combChunk.split(' ');
-	for (let i = 0; i < tokens.length; i++) {
-            const exists = this.trie.exists(tokens[i]);
-	    if (exists === null && i === tokens.length - 1) {
-                this.chunk = tokens[i];
-	    } else {
-                this.state = this.state.next(tokens[i]);
+        for (const chr of chunk) {
+            const res = this.trieIter.next(chr);
+	    if (res === null) {
+                this.chunk += chr;
+		continue;
 	    }
+	    this.state = this.state.next(this.chunk + chr);
+	    this.chunk = '';
 	}
     }
 }
+
+const trie = new Trie(TOKENS);
 
 const chatCont = document.getElementById(CHAT_CONT_ID);
 const promptInput = document.getElementById(PROMPT_INPUT_ID);
@@ -123,11 +162,10 @@ submitChatButton.addEventListener('click', () => {
     addChat(userText, USER_CHAT_CLASS, chatCont);
     promptInput.value = '';
 
-    const chunkedText = { text: '' };
-    const chatStore = createChatStore(LLM_CHAT_CLASS, chatCont);
+    const stateParser = new StateParser(chatCont, new TrieIter(trie.root()));
 
     chatWs = new WebSocket(CHAT_URL);
-    chatWs.onmessage = (evnt) => loadChunk(evnt.data, chunkedText, chatStore);
+    chatWs.onmessage = (evnt) => stateParser.parse(evnt.data);
     chatWs.onopen = (evnt) => chatWs.send(JSON.stringify({
         clientId: sessionStorage.getItem(CLIENT_ID_KEY),
         prompt: userText

@@ -1,4 +1,77 @@
+html, body {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+}
+
+:root {
+  --max-chatbox-width: 60em;
+}
+
+.roboto-normal-300 {
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+.chatbox-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--max-chatbox-width);
+  height: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+.chat-container {
+  width: 100%;
+  overflow-y: auto;
+  flex-grow: 1;
+  scrollbar-width: none;
+}
+
+.prompt-form-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 10em;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.prompt-input {
+  height: 100%;
+  width: 100%;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  resize: none;
+}
+
+.prompt-form-buttons {
+  margin-top: 1rem;
+}
+
+.chat {
+  margin-bottom: 1rem;
+}
+
 .chat__llm {
   border-style: solid;
-  padding: 0.25rem;
+  padding: 0.5rem;
+}
+
+.chat--thinking {
+  color: gray;
+  border-color: lightgray;
 }

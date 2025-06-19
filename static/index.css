@@ -1,3 +1,9 @@
+:root {
+  --max-chatbox-width: 60em;
+  --textbox-border-radius: 6px;
+}
+
+
 html, body {
   display: flex;
   flex-direction: column;
@@ -8,8 +14,8 @@ html, body {
   align-items: center;
 }
 
-:root {
-  --max-chatbox-width: 60em;
+body {
+  background-color: #FFF8F0;
 }
 
 .nunito-400-normal {
@@ -62,22 +68,49 @@ html, body {
   margin-left: 1rem;
   margin-right: 1rem;
   resize: none;
+  font-size: 1.01rem;
+  color: #4B2E2E;
+  background-color: #FDF4E3;
+  border-radius: var(--textbox-border-radius);
+  border-color: black;
 }
 
 .prompt-form-buttons {
   margin-top: 1rem;
 }
 
+.button {
+  font-size: 1.01rem;
+  color: #33312E;
+  background-color: #A3B18A;
+  border: none;
+  border-radius: var(--textbox-border-radius);
+}
+
+.button__primary {
+  color: #4B2E2E;
+  background-color: #E1A95F;
+}
+
 .chat {
   margin-bottom: 1rem;
+  border-radius: var(--textbox-border-radius);
+}
+
+.chat__user {
+  color: #D9774B;
 }
 
 .chat__llm {
   border-style: solid;
   padding: 0.5rem;
+  color: #FDF4E3;
+  background-color: #4B2E2E;
+  border-color: #4B2E2E;
 }
 
 .chat--thinking {
-  color: gray;
-  border-color: lightgray;
+  color: #FAF7F5;
+  background-color: #A3B18A;
+  border-color: #A3B18A;
 }

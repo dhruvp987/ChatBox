@@ -4,9 +4,9 @@ const SBMT_CHAT_BTN_ID = 'submit-chat-button';
 const CNCL_CHAT_BTN_ID = 'cancel-chat-button';
 const CLR_CHAT_BTN_ID = 'clear-chat-button';
 
-const USER_CHAT_CLASS = 'chat chat__user';
-const LLM_CHAT_CLASS = 'chat chat__llm';
-const LLM_THINKING_CLASS = 'chat chat__llm chat--thinking';
+const USER_CHAT_CLASS = 'chat chat__user nunito-400-normal';
+const LLM_CHAT_CLASS = 'chat chat__llm lora-400-normal';
+const LLM_THINKING_CLASS = 'chat chat__llm chat--thinking lora-400-normal';
 
 const CONN_URL = 'ws://127.0.0.1:8000/connection';
 const CHAT_URL = 'ws://127.0.0.1:8000/chat';

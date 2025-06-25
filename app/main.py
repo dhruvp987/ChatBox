@@ -9,7 +9,9 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
-from llamacppllm import LlamaCppChats, LlamaCppLlm
+from llamacppmodel import LlamaCppModel, LlamaCppContext
+from chat import Chat
+from chattemplate import Jinja2ChatTemplate
 
 # A context window that doesn't take too much resources, making
 # it easier to work with for now
@@ -40,7 +42,11 @@ if platform.system() == 'Windows':
 # If using fastapi dev, make sure the --no-reload option is set,
 # otherwise the LLM will be loaded multiple times and use
 # excessive resources
-llm = LlamaCppLlm(model_path, MAX_CTX)
+model = LlamaCppModel(model_path)
+
+chat_template_str = model.chat_template()
+chat_template_str = chat_template_str if chat_template_str is not None else Jinja2ChatTemplate.LLAMA2_TEMP
+chat_template = Jinja2ChatTemplate(chat_template_str)
 
 chat_histories = {}
 
@@ -54,7 +60,7 @@ async def index(req: Request):
 async def connection(ws: WebSocket):
     await ws.accept()
     client_id = str(uuid.uuid4())
-    chat_histories[client_id] = LlamaCppChats()
+    chat_histories[client_id] = Chat()
     await ws.send_text(client_id)
     try:
         while True:
@@ -69,13 +75,17 @@ async def chat(ws: WebSocket):
     # Format: { clientId: str; prompt: str }
     payload = json.loads(await ws.receive_text())
     chats = chat_histories[payload['clientId']]
-    chunks = []
 
-    chats.add(LlamaCppChats.USER_ROLE, payload['prompt'])
-    res_stream = llm.chat(chats)
+    ctx = LlamaCppContext(model, MAX_CTX)
+
+    chats.add(Chat.USER_ROLE, payload['prompt'])
+
+    res_stream = ctx.complete_chat(chats, chat_template)
+    chunks = []
 
     try:
         for chnk in res_stream:
+            print(chnk, end='')
             await ws.send_text(chnk)
             await asyncio.sleep(0)
             chunks.append(chnk)
@@ -84,7 +94,7 @@ async def chat(ws: WebSocket):
         pass
     finally:
         if len(chunks) > 0:
-            chats.add(LlamaCppChats.LLM_ROLE, ''.join(chunks))
+            chats.add(Chat.MODEL_ROLE, ''.join(chunks))
 
 
 @app.post('/clear')
@@ -92,5 +102,5 @@ async def clear(authorization: Annotated[str | None, Header()] = None):
     if authorization is None or authorization not in chat_histories:
         raise HTTPException(status_code=401)
     else:
-        chat_histories[authorization] = LlamaCppChats()
+        chat_histories[authorization] = Chat()
 

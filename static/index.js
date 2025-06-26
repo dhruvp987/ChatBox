@@ -83,7 +83,9 @@ class TrieIter {
 	    return false;
 	}
 	this.curNode = this.curNode.chs[chr];
-	return this.curNode.terminal;
+	const curNodeTerm = this.curNode.terminal;
+	if (this.curNode.terminal !== null) this.curNode = this.root;
+	return curNodeTerm;
     }
 }
 
@@ -110,13 +112,16 @@ class ResponseState {
 class ThinkingState {
     constructor(chatCont) {
         this.chatCont = chatCont;
-	this.chatStore = createChatStore(LLM_THINKING_CLASS, chatCont);
+	this.chatStore = null;
 	this.chat = '';
     }
 
     next(token) {
         if (token === THINK_END_TOK) {
             return new ResponseState(chatCont);
+	}
+        if (this.chatStore === null) {
+            this.chatStore = createChatStore(LLM_THINKING_CLASS, chatCont);
 	}
 	this.chat += token;
 	fillChatStore(this.chatStore, this.chat);

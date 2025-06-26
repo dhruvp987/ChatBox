@@ -1,14 +1,14 @@
 import ctypes
+import sys
 import llama_cpp
 
 class LlamaCppError(Exception):
     pass
 
 class LlamaCppModel:
-    def __init__(self, model_path):
+    def __init__(self, model_path, n_gpu_layers=sys.maxsize):
         model_params = llama_cpp.llama_model_default_params()
-        # Try to utilize GPU as much as possible
-        model_params.n_gpu_layers = -1
+        model_params.n_gpu_layers = n_gpu_layers
 
         self._model = llama_cpp.llama_load_model_from_file(bytes(model_path, 'utf-8'), model_params)
         if self._model is None:

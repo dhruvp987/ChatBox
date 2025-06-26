@@ -85,7 +85,6 @@ async def chat(ws: WebSocket):
 
     try:
         for chnk in res_stream:
-            print(chnk, end='')
             await ws.send_text(chnk)
             await asyncio.sleep(0)
             chunks.append(chnk)

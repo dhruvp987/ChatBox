@@ -1,13 +1,17 @@
 import ctypes
-import sys
 import llama_cpp
+
+INT32_MAX = 2147483647
 
 class LlamaCppError(Exception):
     pass
 
 class LlamaCppModel:
-    def __init__(self, model_path, n_gpu_layers=sys.maxsize):
+    def __init__(self, model_path, n_gpu_layers=INT32_MAX):
         model_params = llama_cpp.llama_model_default_params()
+        # The largest 32-bit integer is used by default because
+        # the n_gpu_layers model parameter is of type int32_t,
+        # and we want to offload as much work to the GPU as possible
         model_params.n_gpu_layers = n_gpu_layers
 
         self._model = llama_cpp.llama_load_model_from_file(bytes(model_path, 'utf-8'), model_params)

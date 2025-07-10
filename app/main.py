@@ -2,7 +2,6 @@ import asyncio
 import json
 import os
 import platform
-import sys
 import uuid
 from fastapi import FastAPI, Header, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
@@ -17,11 +16,6 @@ from chattemplate import Jinja2ChatTemplate
 # it easier to work with for now
 MAX_CTX = 4096
 
-
-def print_err(msg):
-    print(f'Error: {msg}', file=sys.stderr)
-
-
 app = FastAPI()
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
@@ -30,8 +24,10 @@ templates = Jinja2Templates(directory='templates')
 
 model_path = os.getenv('MODEL_PATH', '')
 if model_path == '':
-    print_err('MODEL_PATH env is not set')
-    sys.exit(1)
+    raise OSError('MODEL_PATH env is not set')
+
+if not os.path.isfile(model_path):
+    raise FileNotFoundError('model path is invalid or does not lead to a file')
 
 model_temp = float(os.getenv('MODEL_TEMP', '0.8'))
 model_min_p = float(os.getenv('MODEL_MIN_P', '0.05'))

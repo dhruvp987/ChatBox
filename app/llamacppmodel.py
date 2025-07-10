@@ -53,11 +53,8 @@ class LlamaCppContext:
         model,
         n_ctx=4096,
         n_batch=512,
-        temp=0.8,
-        top_k=40,
-        repeat_pen=1.1,
         min_p=0.05,
-        top_p=0.95
+        temp=0.8
     ):
         self._model = model
         self._n_ctx = n_ctx
@@ -75,13 +72,9 @@ class LlamaCppContext:
 
         smpl_params = llama_cpp.llama_sampler_chain_default_params()
         self._smpl = llama_cpp.llama_sampler_chain_init(smpl_params)
-        llama_cpp.llama_sampler_chain_add(self._smpl, llama_cpp.llama_sampler_init_temp(temp))
-        llama_cpp.llama_sampler_chain_add(self._smpl, llama_cpp.llama_sampler_init_top_k(top_k))
-        llama_cpp.llama_sampler_chain_add(self._smpl, llama_cpp.llama_sampler_init_penalties(0, repeat_pen, 0, 0))
         llama_cpp.llama_sampler_chain_add(self._smpl, llama_cpp.llama_sampler_init_min_p(min_p, 1))
-        llama_cpp.llama_sampler_chain_add(self._smpl, llama_cpp.llama_sampler_init_top_p(top_p, 1))
-        # TODO: Replace greedy decoder with random selection of token from modified prob dist
-        llama_cpp.llama_sampler_chain_add(self._smpl, llama_cpp.llama_sampler_init_greedy())
+        llama_cpp.llama_sampler_chain_add(self._smpl, llama_cpp.llama_sampler_init_temp(temp))
+        llama_cpp.llama_sampler_chain_add(self._smpl, llama_cpp.llama_sampler_init_dist(llama_cpp.LLAMA_DEFAULT_SEED))
 
         self._batch = llama_cpp.llama_batch_init(n_batch, 0, 1)
 

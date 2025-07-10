@@ -33,6 +33,9 @@ if model_path == '':
     print_err('MODEL_PATH env is not set')
     sys.exit(1)
 
+model_temp = float(os.getenv('MODEL_TEMP', '0.8'))
+model_min_p = float(os.getenv('MODEL_MIN_P', '0.05'))
+
 # If using fastapi dev, make sure the --no-reload option is set,
 # otherwise the LLM will be loaded multiple times and use
 # excessive resources
@@ -70,7 +73,7 @@ async def chat(ws: WebSocket):
     payload = json.loads(await ws.receive_text())
     chats = chat_histories[payload['clientId']]
 
-    ctx = LlamaCppContext(model, MAX_CTX)
+    ctx = LlamaCppContext(model, MAX_CTX, min_p=model_min_p, temp=model_temp)
 
     chats.add(Chat.USER_ROLE, payload['prompt'])
 

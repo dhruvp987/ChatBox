@@ -35,7 +35,7 @@ model_min_p = float(os.getenv('MODEL_MIN_P', '0.05'))
 # If using fastapi dev, make sure the --no-reload option is set,
 # otherwise the LLM will be loaded multiple times and use
 # excessive resources
-model = LlamaCppModel(model_path)
+model = LlamaCppModel(bytes(model_path))
 
 chat_template_str = model.chat_template()
 chat_template_str = chat_template_str if chat_template_str is not None else Jinja2ChatTemplate.LLAMA2_TEMP

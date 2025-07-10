@@ -24,7 +24,7 @@ class LlamaCppModel:
         # and we want to offload as much work to the GPU as possible
         model_params.n_gpu_layers = n_gpu_layers
 
-        self._model = llama_cpp.llama_load_model_from_file(bytes(model_path, 'utf-8'), model_params)
+        self._model = llama_cpp.llama_load_model_from_file(model_path, model_params)
         if self._model is None:
             raise LlamaCppError('Could not load model')
 

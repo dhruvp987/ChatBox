@@ -139,7 +139,7 @@ class LlamaCppContext:
 
             ind_tok_arr = (llama_cpp.llama_token * 1)()
             ind_tok_arr[0] = tok_id
-            set_llama_cpp_batch(self._batch, ind_tok_arr, 1, 0, prmpt_n_toks + n_toks_gen)
+            set_llama_cpp_batch(self._batch, ind_tok_arr, 1, 0, prmpt_n_toks + n_toks_gen - 1)
 
             if llama_cpp.llama_decode(self._ctx, self._batch) < 0:
                 raise LlamaCppError('Could not decode generated tokens')

@@ -181,13 +181,17 @@ submitChatButton.addEventListener('click', () => {
 const cancelChatButton = document.getElementById(CNCL_CHAT_BTN_ID);
 cancelChatButton.addEventListener('click', () => {
     if (chatWs !== null) {
-        chatWs.close()
+        chatWs.close();
 	chatWs = null;
     }
 });
 
 const clearChatButton = document.getElementById(CLR_CHAT_BTN_ID);
 clearChatButton.addEventListener('click', async () => {
+    if (chatWs !== null) {
+        chatWs.close();
+	chatWs = null;
+    }
     await fetch(CLEAR_CHAT_URL, {
         method: 'post',
 	headers: {

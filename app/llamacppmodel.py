@@ -13,6 +13,9 @@ def set_llama_cpp_batch(batch, tok_arr, n_toks, tok_start, n_past):
         batch.logits[i - tok_start] = False
     batch.logits[n_toks - 1] = True
 
+def llama_init():
+    llama_cpp.llama_backend_init()
+
 class LlamaCppError(Exception):
     pass
 
@@ -54,7 +57,8 @@ class LlamaCppContext:
         n_ctx=4096,
         n_batch=512,
         min_p=0.05,
-        temp=0.8
+        temp=0.8,
+        offload_kqv=True
     ):
         self._model = model
         self._n_ctx = n_ctx
@@ -64,6 +68,8 @@ class LlamaCppContext:
         ctx_params.n_ctx = n_ctx
         ctx_params.n_batch = n_batch
         ctx_params.n_ubatch = n_batch
+        ctx_params.offload_kqv = offload_kqv
+
         self._ctx = llama_cpp.llama_new_context_with_model(model.model, ctx_params)
         if self._ctx is None:
             raise LlamaCppError('Could not create context')

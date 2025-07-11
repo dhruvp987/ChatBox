@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
+import llamacppmodel as lcm
 from llamacppmodel import LlamaCppModel, LlamaCppContext
 from chat import Chat
 from chattemplate import Jinja2ChatTemplate
@@ -31,6 +32,8 @@ if not os.path.isfile(model_path):
 
 model_temp = float(os.getenv('MODEL_TEMP', '0.8'))
 model_min_p = float(os.getenv('MODEL_MIN_P', '0.05'))
+
+lcm.llama_init()
 
 # If using fastapi dev, make sure the --no-reload option is set,
 # otherwise the LLM will be loaded multiple times and use

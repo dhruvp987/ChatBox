@@ -55,10 +55,9 @@ class LlamaCppModel:
 
 
 class LlamaCppContext:
-    def __init__(
-        self, model, n_ctx=4096, n_batch=512, min_p=0.05, temp=0.8, offload_kqv=True
-    ):
+    def __init__(self, model, sampler, n_ctx=4096, n_batch=512, offload_kqv=True):
         self._model = model
+        self._smpl = sampler
         self._n_ctx = n_ctx
         self._n_batch = n_batch
 
@@ -73,18 +72,6 @@ class LlamaCppContext:
             raise LlamaCppError("Could not create context")
 
         self._vocab = model.vocab
-
-        smpl_params = llama_cpp.llama_sampler_chain_default_params()
-        self._smpl = llama_cpp.llama_sampler_chain_init(smpl_params)
-        llama_cpp.llama_sampler_chain_add(
-            self._smpl, llama_cpp.llama_sampler_init_min_p(min_p, 1)
-        )
-        llama_cpp.llama_sampler_chain_add(
-            self._smpl, llama_cpp.llama_sampler_init_temp(temp)
-        )
-        llama_cpp.llama_sampler_chain_add(
-            self._smpl, llama_cpp.llama_sampler_init_dist(llama_cpp.LLAMA_DEFAULT_SEED)
-        )
 
         self._batch = llama_cpp.llama_batch_init(n_batch, 0, 1)
 
@@ -122,7 +109,9 @@ class LlamaCppContext:
 
         n_toks_gen = 0
         while prmpt_n_toks + n_toks_gen + 1 < self._n_ctx:
-            tok_id = llama_cpp.llama_sampler_sample(self._smpl, self._ctx, -1)
+            tok_id = llama_cpp.llama_sampler_sample(
+                self._smpl.llama_cpp_sampler, self._ctx, -1
+            )
             if llama_cpp.llama_vocab_is_eog(self._vocab, tok_id):
                 break
             n_toks_gen += 1
@@ -149,5 +138,4 @@ class LlamaCppContext:
 
     def __del__(self):
         llama_cpp.llama_free(self._ctx)
-        llama_cpp.llama_sampler_free(self._smpl)
         llama_cpp.llama_batch_free(self._batch)

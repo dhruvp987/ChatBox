@@ -17,6 +17,7 @@ from fastapi.templating import Jinja2Templates
 from typing import Annotated
 import llamacppmodel as lcm
 from llamacppmodel import LlamaCppModel, LlamaCppContext
+from llamacppsampler import CBSampler
 from chat import Chat
 from chattemplate import Jinja2ChatTemplate
 
@@ -46,6 +47,8 @@ lcm.llama_init()
 # otherwise the LLM will be loaded multiple times and use
 # excessive resources
 model = LlamaCppModel(bytes(model_path, "utf-8"))
+
+sampler = CBSampler(model_min_p, model_temp)
 
 chat_template_str = model.chat_template()
 chat_template_str = (
@@ -83,7 +86,7 @@ async def chat(ws: WebSocket):
     payload = json.loads(await ws.receive_text())
     chats = chat_histories[payload["clientId"]]
 
-    ctx = LlamaCppContext(model, MAX_CTX, min_p=model_min_p, temp=model_temp)
+    ctx = LlamaCppContext(model, sampler, MAX_CTX)
 
     chats.add(Chat.USER_ROLE, payload["prompt"])
 

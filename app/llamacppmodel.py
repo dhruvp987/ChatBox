@@ -3,6 +3,7 @@ import llama_cpp
 
 INT32_MAX = 2147483647
 
+
 def set_llama_cpp_batch(batch, tok_arr, n_toks, tok_start, n_past):
     batch.n_tokens = n_toks
     for i in range(tok_start, tok_start + n_toks):
@@ -13,11 +14,14 @@ def set_llama_cpp_batch(batch, tok_arr, n_toks, tok_start, n_past):
         batch.logits[i - tok_start] = False
     batch.logits[n_toks - 1] = True
 
+
 def llama_init():
     llama_cpp.llama_backend_init()
 
+
 class LlamaCppError(Exception):
     pass
+
 
 class LlamaCppModel:
     def __init__(self, model_path, n_gpu_layers=INT32_MAX):
@@ -29,7 +33,7 @@ class LlamaCppModel:
 
         self._model = llama_cpp.llama_load_model_from_file(model_path, model_params)
         if self._model is None:
-            raise LlamaCppError('Could not load model')
+            raise LlamaCppError("Could not load model")
 
         self._vocab = llama_cpp.llama_model_get_vocab(self._model)
 
@@ -52,13 +56,7 @@ class LlamaCppModel:
 
 class LlamaCppContext:
     def __init__(
-        self,
-        model,
-        n_ctx=4096,
-        n_batch=512,
-        min_p=0.05,
-        temp=0.8,
-        offload_kqv=True
+        self, model, n_ctx=4096, n_batch=512, min_p=0.05, temp=0.8, offload_kqv=True
     ):
         self._model = model
         self._n_ctx = n_ctx
@@ -72,34 +70,34 @@ class LlamaCppContext:
 
         self._ctx = llama_cpp.llama_new_context_with_model(model.model, ctx_params)
         if self._ctx is None:
-            raise LlamaCppError('Could not create context')
-        
+            raise LlamaCppError("Could not create context")
+
         self._vocab = model.vocab
 
         smpl_params = llama_cpp.llama_sampler_chain_default_params()
         self._smpl = llama_cpp.llama_sampler_chain_init(smpl_params)
-        llama_cpp.llama_sampler_chain_add(self._smpl, llama_cpp.llama_sampler_init_min_p(min_p, 1))
-        llama_cpp.llama_sampler_chain_add(self._smpl, llama_cpp.llama_sampler_init_temp(temp))
-        llama_cpp.llama_sampler_chain_add(self._smpl, llama_cpp.llama_sampler_init_dist(llama_cpp.LLAMA_DEFAULT_SEED))
+        llama_cpp.llama_sampler_chain_add(
+            self._smpl, llama_cpp.llama_sampler_init_min_p(min_p, 1)
+        )
+        llama_cpp.llama_sampler_chain_add(
+            self._smpl, llama_cpp.llama_sampler_init_temp(temp)
+        )
+        llama_cpp.llama_sampler_chain_add(
+            self._smpl, llama_cpp.llama_sampler_init_dist(llama_cpp.LLAMA_DEFAULT_SEED)
+        )
 
         self._batch = llama_cpp.llama_batch_init(n_batch, 0, 1)
 
     def complete_chat(self, chat, chat_template):
-        chat_fmtted = bytes(chat_template.render(chat), 'utf-8')
+        chat_fmtted = bytes(chat_template.render(chat), "utf-8")
 
         # Get the prompt's number of tokens to create an accurately-sized
         # array to store those tokens
         prmpt_n_toks = -llama_cpp.llama_tokenize(
-            self._vocab,
-            chat_fmtted,
-            len(chat_fmtted),
-            None,
-            0,
-            True,
-            True
+            self._vocab, chat_fmtted, len(chat_fmtted), None, 0, True, True
         )
         if prmpt_n_toks >= self._n_ctx:
-            raise LlamaCppError('Prompt fills context size')
+            raise LlamaCppError("Prompt fills context size")
 
         prmpt_tok_arr = (llama_cpp.llama_token * prmpt_n_toks)()
         res = llama_cpp.llama_tokenize(
@@ -109,16 +107,18 @@ class LlamaCppContext:
             prmpt_tok_arr,
             prmpt_n_toks,
             True,
-            True
+            True,
         )
         if res < 0:
-            raise LlamaCppError('Could not tokenize the prompt')
+            raise LlamaCppError("Could not tokenize the prompt")
 
         for i in range(0, prmpt_n_toks, self._n_batch):
             n_bth_or_n_toks = min(prmpt_n_toks, self._n_batch)
-            set_llama_cpp_batch(self._batch, prmpt_tok_arr, min(prmpt_n_toks - i, n_bth_or_n_toks), i, i)
+            set_llama_cpp_batch(
+                self._batch, prmpt_tok_arr, min(prmpt_n_toks - i, n_bth_or_n_toks), i, i
+            )
             if llama_cpp.llama_decode(self._ctx, self._batch) < 0:
-                raise LlamaCppError('Could not decode prompt')
+                raise LlamaCppError("Could not decode prompt")
 
         n_toks_gen = 0
         while prmpt_n_toks + n_toks_gen + 1 < self._n_ctx:
@@ -129,29 +129,25 @@ class LlamaCppContext:
 
             tok_buf = bytes(128)
             res = llama_cpp.llama_token_to_piece(
-                self._vocab,
-                tok_id,
-                tok_buf,
-                128,
-                0,
-                True
+                self._vocab, tok_id, tok_buf, 128, 0, True
             )
             if res < 0:
-                raise LlamaCppError('Could not convert generated token to string')
+                raise LlamaCppError("Could not convert generated token to string")
 
-            tok_str = tok_buf.rstrip(b'\x00').decode()
+            tok_str = tok_buf.rstrip(b"\x00").decode()
 
             yield tok_str
 
             ind_tok_arr = (llama_cpp.llama_token * 1)()
             ind_tok_arr[0] = tok_id
-            set_llama_cpp_batch(self._batch, ind_tok_arr, 1, 0, prmpt_n_toks + n_toks_gen - 1)
+            set_llama_cpp_batch(
+                self._batch, ind_tok_arr, 1, 0, prmpt_n_toks + n_toks_gen - 1
+            )
 
             if llama_cpp.llama_decode(self._ctx, self._batch) < 0:
-                raise LlamaCppError('Could not decode generated tokens')
+                raise LlamaCppError("Could not decode generated tokens")
 
     def __del__(self):
         llama_cpp.llama_free(self._ctx)
         llama_cpp.llama_sampler_free(self._smpl)
         llama_cpp.llama_batch_free(self._batch)
-

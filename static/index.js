@@ -172,10 +172,16 @@ submitChatButton.addEventListener('click', () => {
 
     chatWs = new WebSocket(CHAT_URL);
     chatWs.onmessage = (evnt) => stateParser.parse(evnt.data);
-    chatWs.onopen = (evnt) => chatWs.send(JSON.stringify({
-        clientId: sessionStorage.getItem(CLIENT_ID_KEY),
-        prompt: userText
-    }));
+    chatWs.onclose = (evnt) => {
+        submitChatButton.hidden = false;
+    }
+    chatWs.onopen = (evnt) => {
+	submitChatButton.hidden = true;
+	chatWs.send(JSON.stringify({
+            clientId: sessionStorage.getItem(CLIENT_ID_KEY),
+            prompt: userText
+        }));
+    }
 });
 
 const cancelChatButton = document.getElementById(CNCL_CHAT_BTN_ID);

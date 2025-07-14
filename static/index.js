@@ -4,10 +4,6 @@ const SBMT_CHAT_BTN_ID = 'submit-chat-button';
 const CNCL_CHAT_BTN_ID = 'cancel-chat-button';
 const CLR_CHAT_BTN_ID = 'clear-chat-button';
 
-const USER_CHAT_CLASS = 'chat chat__user nunito-400-normal';
-const LLM_CHAT_CLASS = 'chat chat__llm lora-400-normal';
-const LLM_THINKING_CLASS = 'chat chat__llm chat--thinking lora-400-normal';
-
 const CONN_URL = 'ws://127.0.0.1:8000/connection';
 const CHAT_URL = 'ws://127.0.0.1:8000/chat';
 const CLEAR_CHAT_URL = 'http://127.0.0.1:8000/clear';
@@ -18,26 +14,99 @@ const THINK_TOK = '<think>\n';
 const THINK_END_TOK = '\n</think>';
 const TOKENS = [THINK_TOK, THINK_END_TOK];
 
-function createChatStore(chatClass, chatCont, chatId = null) {
-    const chatStore = document.createElement('div');
-    if (chatId !== null) chatStore.id = chatId;
-    chatStore.className = chatClass;
-    chatCont.append(chatStore);
-    return chatStore;
+class UserPromptStore {
+    constructor() {
+        this.store = document.createElement('div');
+	this.store.className = 'chat chat__user nunito-400-normal';
+    }
+
+    fill(elem) {
+        this.store.innerHTML = elem;
+    }
+
+    appendTo(container) {
+        container.appendChild(this.store);
+    }
 }
 
-function fillChatStore(store, mdText) {
-    store.innerHTML = DOMPurify.sanitize(marked.parse(mdText));
+class LlmResponseStore {
+    constructor() {
+        this.store = document.createElement('div');
+	this.store.className = 'chat chat__llm lora-400-normal';
+    }
+
+    fill(elem) {
+        this.store.innerHTML = elem;
+    }
+
+    appendTo(container) {
+        container.appendChild(this.store);
+    }
 }
 
-function addChat(mdText, chatClass, chatCont) {
-    const chatStore = createChatStore(chatClass, chatCont);
-    fillChatStore(chatStore, mdText);
+class LlmThoughtStore {
+    static COLLAPSED = 0;
+    static EXPANDED = 1;
+
+    constructor() {
+	this.topBarMsg = document.createElement('p');
+	this.topBarMsg.innerText = 'Thinking';
+	this.topBarMsg.className = 'bar-msg bar-msg__thinking-chat';
+
+	this.topBarClspBut = document.createElement('input');
+	this.topBarClspBut.type = 'button';
+	this.topBarClspBut.className = 'bar-clsp-but bar-clsp-but__thinking-chat';
+	this.topBarClspBut.addEventListener('click', () => {
+            if (this.clspState === LlmThoughtStore.COLLAPSED) {
+                this.expand();
+	    } else {
+                this.collapse();
+	    }
+	});
+
+	this.topBar = document.createElement('div');
+	this.topBar.className = 'bar bar__thinking-chat';
+	this.topBar.appendChild(this.topBarMsg);
+	this.topBar.appendChild(this.topBarClspBut);
+
+        this.store = document.createElement('div');
+
+	this.clspState = LlmThoughtStore.COLLAPSED;
+	this.collapse();
+
+        this.cont = document.createElement('div');
+	this.cont.className = 'chat chat__llm chat--thinking lora-400-normal';
+	this.cont.appendChild(this.topBar);
+	this.cont.appendChild(this.store);
+    }
+
+    fill(elem) {
+        this.store.innerHTML = elem;
+    }
+
+    expand() {
+        this.topBarClspBut.value = 'Collapse';
+	this.store.hidden = false;
+	this.clspState = LlmThoughtStore.EXPANDED;
+    }
+
+    collapse() {
+        this.topBarClspBut.value = 'Expand';
+	this.store.hidden = true;
+	this.clspState = LlmThoughtStore.COLLAPSED;
+    }
+
+    finish() {
+        this.topBarMsg.innerHTML = 'Thoughts';
+    }
+
+    appendTo(container) {
+        container.appendChild(this.cont);
+    }
 }
 
-function loadChunk(chunk, chunkedText, chatStore) {
-    chunkedText.text += chunk;
-    fillChatStore(chatStore, chunkedText.text);
+function renderMd(mdText) {
+    return DOMPurify.sanitize(marked.parse(mdText));
 }
 
 class TrieNode {
@@ -101,10 +170,11 @@ class ResponseState {
             return new ThinkingState(this.chatCont);
 	}
 	if (this.chatStore === null) {
-            this.chatStore = createChatStore(LLM_CHAT_CLASS, chatCont);
+            this.chatStore = new LlmResponseStore();
+	    this.chatStore.appendTo(this.chatCont);
 	}
 	this.chat += token;
-	fillChatStore(this.chatStore, this.chat);
+	this.chatStore.fill(renderMd(this.chat));
 	return this;
     }
 }
@@ -118,13 +188,15 @@ class ThinkingState {
 
     next(token) {
         if (token === THINK_END_TOK) {
+	    if (this.chatStore !== null) this.chatStore.finish();
             return new ResponseState(chatCont);
 	}
         if (this.chatStore === null) {
-            this.chatStore = createChatStore(LLM_THINKING_CLASS, chatCont);
+            this.chatStore = new LlmThoughtStore();
+	    this.chatStore.appendTo(this.chatCont);
 	}
 	this.chat += token;
-	fillChatStore(this.chatStore, this.chat);
+        this.chatStore.fill(renderMd(this.chat));
 	return this;
     }
 }
@@ -165,7 +237,9 @@ let chatWs = null;
 const submitChatButton = document.getElementById(SBMT_CHAT_BTN_ID);
 submitChatButton.addEventListener('click', () => {
     const userText = promptInput.value;
-    addChat(userText, USER_CHAT_CLASS, chatCont);
+    const userStore = new UserPromptStore();
+    userStore.appendTo(chatCont);
+    userStore.fill(renderMd(userText));
     promptInput.value = '';
 
     const stateParser = new StateParser(chatCont, new TrieIter(trie.root()));

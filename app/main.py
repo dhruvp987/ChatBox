@@ -39,7 +39,9 @@ if not os.path.isfile(model_path):
     raise FileNotFoundError("model path is invalid or does not lead to a file")
 
 model_temp = float(os.getenv("MODEL_TEMP", "0.8"))
+model_top_k = int(os.getenv("MODEL_TOP_K", "40"))
 model_min_p = float(os.getenv("MODEL_MIN_P", "0.05"))
+model_top_p = float(os.getenv("MODEL_TOP_P", "0.95"))
 
 lcm.llama_init()
 
@@ -48,7 +50,7 @@ lcm.llama_init()
 # excessive resources
 model = LlamaCppModel(bytes(model_path, "utf-8"))
 
-sampler = CBSampler(model_min_p, model_temp)
+sampler = CBSampler(model_temp, model_top_k, model_min_p, model_top_p)
 
 chat_template_str = model.chat_template()
 chat_template_str = (

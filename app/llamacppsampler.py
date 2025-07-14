@@ -2,7 +2,7 @@ import llama_cpp
 
 
 class CBSampler:
-    def __init__(self, temp=0.8, top_k=40, min_p=0.05, top_p=0.95):
+    def __init__(self, temp=0.8, top_k=40, rep_pen=1.1, min_p=0.05, top_p=0.95):
         smpl_params = llama_cpp.llama_sampler_chain_default_params()
         self._smpl = llama_cpp.llama_sampler_chain_init(smpl_params)
         llama_cpp.llama_sampler_chain_add(
@@ -10,6 +10,9 @@ class CBSampler:
         )
         llama_cpp.llama_sampler_chain_add(
             self._smpl, llama_cpp.llama_sampler_init_top_k(top_k)
+        )
+        llama_cpp.llama_sampler_chain_add(
+            self._smpl, llama_cpp.llama_sampler_init_penalties(0, rep_pen, 0, 0)
         )
         llama_cpp.llama_sampler_chain_add(
             self._smpl, llama_cpp.llama_sampler_init_min_p(min_p, 1)

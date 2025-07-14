@@ -31,17 +31,18 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 
-model_path = os.getenv("MODEL_PATH", "")
+model_path = os.getenv("CB_MODEL_PATH", "")
 if model_path == "":
-    raise OSError("MODEL_PATH env is not set")
+    raise OSError("CB_MODEL_PATH env is not set")
 
 if not os.path.isfile(model_path):
     raise FileNotFoundError("model path is invalid or does not lead to a file")
 
-model_temp = float(os.getenv("MODEL_TEMP", "0.8"))
-model_top_k = int(os.getenv("MODEL_TOP_K", "40"))
-model_min_p = float(os.getenv("MODEL_MIN_P", "0.05"))
-model_top_p = float(os.getenv("MODEL_TOP_P", "0.95"))
+samp_temp = float(os.getenv("CB_TEMP", "0.8"))
+samp_top_k = int(os.getenv("CB_TOP_K", "40"))
+samp_rep_pen = float(os.getenv("CB_REP_PEN", "1.1"))
+samp_min_p = float(os.getenv("CB_MIN_P", "0.05"))
+samp_top_p = float(os.getenv("CB_TOP_P", "0.95"))
 
 lcm.llama_init()
 
@@ -50,7 +51,7 @@ lcm.llama_init()
 # excessive resources
 model = LlamaCppModel(bytes(model_path, "utf-8"))
 
-sampler = CBSampler(model_temp, model_top_k, model_min_p, model_top_p)
+sampler = CBSampler(samp_temp, samp_top_k, samp_rep_pen, samp_min_p, samp_top_p)
 
 chat_template_str = model.chat_template()
 chat_template_str = (

@@ -234,31 +234,8 @@ connWs.onmessage = (evnt) => {
 
 let chatWs = null;
 
-const submitChatButton = document.getElementById(SBMT_CHAT_BTN_ID);
-submitChatButton.addEventListener('click', () => {
-    const userText = promptInput.value;
-    const userStore = new UserPromptStore();
-    userStore.appendTo(chatCont);
-    userStore.fill(renderMd(userText));
-    promptInput.value = '';
-
-    const stateParser = new StateParser(chatCont, new TrieIter(trie.root()));
-
-    chatWs = new WebSocket(CHAT_URL);
-    chatWs.onmessage = (evnt) => stateParser.parse(evnt.data);
-    chatWs.onclose = (evnt) => {
-        submitChatButton.hidden = false;
-    }
-    chatWs.onopen = (evnt) => {
-	submitChatButton.hidden = true;
-	chatWs.send(JSON.stringify({
-            clientId: sessionStorage.getItem(CLIENT_ID_KEY),
-            prompt: userText
-        }));
-    }
-});
-
 const cancelChatButton = document.getElementById(CNCL_CHAT_BTN_ID);
+cancelChatButton.hidden = true;
 cancelChatButton.addEventListener('click', () => {
     if (chatWs !== null) {
         chatWs.close();
@@ -279,5 +256,31 @@ clearChatButton.addEventListener('click', async () => {
 	}
     });
     chatCont.innerHTML = '';
+});
+
+const submitChatButton = document.getElementById(SBMT_CHAT_BTN_ID);
+submitChatButton.addEventListener('click', () => {
+    const userText = promptInput.value;
+    const userStore = new UserPromptStore();
+    userStore.appendTo(chatCont);
+    userStore.fill(renderMd(userText));
+    promptInput.value = '';
+
+    const stateParser = new StateParser(chatCont, new TrieIter(trie.root()));
+
+    chatWs = new WebSocket(CHAT_URL);
+    chatWs.onmessage = (evnt) => stateParser.parse(evnt.data);
+    chatWs.onclose = (evnt) => {
+        submitChatButton.hidden = false;
+	cancelChatButton.hidden = true;
+    }
+    chatWs.onopen = (evnt) => {
+	submitChatButton.hidden = true;
+	cancelChatButton.hidden = false;
+	chatWs.send(JSON.stringify({
+            clientId: sessionStorage.getItem(CLIENT_ID_KEY),
+            prompt: userText
+        }));
+    }
 });
 

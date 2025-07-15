@@ -235,7 +235,6 @@ connWs.onmessage = (evnt) => {
 let chatWs = null;
 
 const cancelChatButton = document.getElementById(CNCL_CHAT_BTN_ID);
-cancelChatButton.hidden = true;
 cancelChatButton.addEventListener('click', () => {
     if (chatWs !== null) {
         chatWs.close();

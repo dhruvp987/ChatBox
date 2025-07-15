@@ -261,14 +261,20 @@ const submitChatButton = document.getElementById(SBMT_CHAT_BTN_ID);
 submitChatButton.addEventListener('click', () => {
     const userText = promptInput.value;
     const userStore = new UserPromptStore();
-    userStore.appendTo(chatCont);
     userStore.fill(renderMd(userText));
+    userStore.appendTo(chatCont);
     promptInput.value = '';
+    chatCont.lastElementChild.scrollIntoView(false);
 
     const stateParser = new StateParser(chatCont, new TrieIter(trie.root()));
 
     chatWs = new WebSocket(CHAT_URL);
-    chatWs.onmessage = (evnt) => stateParser.parse(evnt.data);
+    chatWs.onmessage = (evnt) => {
+	const tolerance = 25;
+        const atBottom = chatCont.scrollHeight - chatCont.clientHeight - chatCont.scrollTop <= tolerance;
+        stateParser.parse(evnt.data);
+	if (atBottom) chatCont.lastElementChild.scrollIntoView(false);
+    }
     chatWs.onclose = (evnt) => {
         submitChatButton.hidden = false;
 	cancelChatButton.hidden = true;

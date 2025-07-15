@@ -55,9 +55,8 @@ class LlamaCppModel:
 
 
 class LlamaCppContext:
-    def __init__(self, model, sampler, n_ctx=4096, n_batch=512, offload_kqv=True):
+    def __init__(self, model, n_ctx=4096, n_batch=512, offload_kqv=True):
         self._model = model
-        self._smpl = sampler
         self._n_ctx = n_ctx
         self._n_batch = n_batch
 
@@ -75,13 +74,11 @@ class LlamaCppContext:
 
         self._batch = llama_cpp.llama_batch_init(n_batch, 0, 1)
 
-    def complete_chat(self, chat, chat_template):
-        chat_fmtted = bytes(chat_template.render(chat), "utf-8")
-
+    def complete_chat(self, chat, sampler):
         # Get the prompt's number of tokens to create an accurately-sized
         # array to store those tokens
         prmpt_n_toks = -llama_cpp.llama_tokenize(
-            self._vocab, chat_fmtted, len(chat_fmtted), None, 0, True, True
+            self._vocab, chat, len(chat), None, 0, True, True
         )
         if prmpt_n_toks >= self._n_ctx:
             raise LlamaCppError("Prompt fills context size")
@@ -89,8 +86,8 @@ class LlamaCppContext:
         prmpt_tok_arr = (llama_cpp.llama_token * prmpt_n_toks)()
         res = llama_cpp.llama_tokenize(
             self._vocab,
-            chat_fmtted,
-            len(chat_fmtted),
+            chat,
+            len(chat),
             prmpt_tok_arr,
             prmpt_n_toks,
             True,
@@ -110,7 +107,7 @@ class LlamaCppContext:
         n_toks_gen = 0
         while prmpt_n_toks + n_toks_gen + 1 < self._n_ctx:
             tok_id = llama_cpp.llama_sampler_sample(
-                self._smpl.llama_cpp_sampler, self._ctx, -1
+                sampler.llama_cpp_sampler, self._ctx, -1
             )
             if llama_cpp.llama_vocab_is_eog(self._vocab, tok_id):
                 break

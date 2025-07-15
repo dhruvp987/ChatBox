@@ -1,7 +1,9 @@
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 import platform
+from queue import Queue
 import uuid
 from fastapi import (
     FastAPI,
@@ -20,6 +22,13 @@ from llamacppmodel import LlamaCppModel, LlamaCppContext
 from llamacppsampler import CBSampler
 from chat import Chat
 from chattemplate import Jinja2ChatTemplate
+
+
+def complete_chat_task(ctx, chat, sampler, out_qu):
+    tok_gen = ctx.complete_chat(chat, sampler)
+    for chnk in tok_gen:
+        out_qu.put(chnk)
+
 
 # A context window that doesn't take too much resources, making
 # it easier to work with for now
@@ -63,6 +72,8 @@ chat_template = Jinja2ChatTemplate(chat_template_str)
 
 chat_histories = {}
 
+thp_exec = ThreadPoolExecutor()
+
 
 @app.get("/", response_class=HTMLResponse)
 async def index(req: Request):
@@ -88,19 +99,37 @@ async def chat(ws: WebSocket):
     # Format: { clientId: str; prompt: str }
     payload = json.loads(await ws.receive_text())
     chats = chat_histories[payload["clientId"]]
-
-    ctx = LlamaCppContext(model, sampler, MAX_CTX)
-
     chats.add(Chat.USER_ROLE, payload["prompt"])
 
-    res_stream = ctx.complete_chat(chats, chat_template)
+    ctx = LlamaCppContext(model, MAX_CTX)
+
+    out_qu = Queue()
+
+    future = thp_exec.submit(
+        complete_chat_task,
+        ctx,
+        bytes(chat_template.render(chats), "utf-8"),
+        sampler,
+        out_qu,
+    )
+
     chunks = []
 
+    async def get_and_send_chnk():
+        try:
+            chnk = out_qu.get_nowait()
+        except:
+            return
+        await ws.send_text(chnk)
+        await asyncio.sleep(0)
+        chunks.append(chnk)
+
     try:
-        for chnk in res_stream:
-            await ws.send_text(chnk)
-            await asyncio.sleep(0)
-            chunks.append(chnk)
+        while not future.done():
+            await get_and_send_chnk()
+        while not out_qu.empty():
+            await get_and_send_chnk()
+
         await ws.close()
     except:
         pass

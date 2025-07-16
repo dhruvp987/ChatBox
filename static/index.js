@@ -14,6 +14,55 @@ const THINK_TOK = '<think>\n';
 const THINK_END_TOK = '\n</think>';
 const TOKENS = [THINK_TOK, THINK_END_TOK];
 
+const CHAT_ENDED_SIG = 'sigChatEnded';
+
+class Subscriber {
+    constructor(callback) {
+        this.callback = callback;
+    }
+
+    notify() {
+        this.callback();
+    }
+}
+
+class SignalManager {
+    constructor() {
+        this.signalAndSubs = {}
+    }
+
+    subscribe(signal, subscriber) {
+        if (!(signal in this.signalAndSubs)) {
+            this.signalAndSubs[signal] = new Set();
+	}
+	this.signalAndSubs[signal].add(subscriber);
+    }
+
+    unsubscribe(signal, subscriber) {
+	if (!(signal in this.signalAndSubs)) return;
+        this.signalAndSubs[signal].delete(subscriber);
+    }
+
+    signal(signalName) {
+        if (!(signalName in this.signalAndSubs)) return;
+	this.signalAndSubs[signalName].forEach(sub => sub.notify());
+    }
+}
+
+const sigManager = new SignalManager();
+
+function sigSubscribe(signal, subscriber) {
+    sigManager.subscribe(signal, subscriber);
+}
+
+function sigUnsubscribe(signal, subscriber) {
+    sigManager.unsubscribe(signal, subscriber);
+}
+
+function signal(signalName) {
+    sigManager.signal(signalName);
+}
+
 class UserPromptStore {
     constructor() {
         this.store = document.createElement('div');
@@ -78,6 +127,9 @@ class LlmThoughtStore {
 	this.cont.className = 'chat chat__llm chat--thinking lora-400-normal';
 	this.cont.appendChild(this.topBar);
 	this.cont.appendChild(this.store);
+
+	this.chatEndedSub = new Subscriber(() => this.finish());
+	sigSubscribe(CHAT_ENDED_SIG, this.chatEndedSub);
     }
 
     fill(elem) {
@@ -98,6 +150,7 @@ class LlmThoughtStore {
 
     finish() {
         this.topBarMsg.innerHTML = 'Thoughts';
+	sigUnsubscribe(CHAT_ENDED_SIG, this.chatEndedSub);
     }
 
     appendTo(container) {
@@ -276,6 +329,7 @@ submitChatButton.addEventListener('click', () => {
 	if (atBottom) chatCont.lastElementChild.scrollIntoView(false);
     }
     chatWs.onclose = (evnt) => {
+	signal(CHAT_ENDED_SIG);
         submitChatButton.hidden = false;
 	cancelChatButton.hidden = true;
     }

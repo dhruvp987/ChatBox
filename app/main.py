@@ -132,7 +132,7 @@ async def chat(ws: WebSocket):
 
         await ws.close()
     except:
-        pass
+        future.cancel()
     finally:
         if len(chunks) > 0:
             chats.add(Chat.MODEL_ROLE, "".join(chunks))

@@ -66,7 +66,7 @@ function signal(signalName) {
 class UserPromptStore {
     constructor() {
         this.store = document.createElement('div');
-	this.store.className = 'chat chat__user nunito-400-normal';
+	this.store.className = 'chat chat__user fredoka-400-normal';
     }
 
     fill(elem) {

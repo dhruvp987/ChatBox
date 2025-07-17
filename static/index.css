@@ -18,11 +18,13 @@ body {
   background-color: #FFF8F0;
 }
 
-.nunito-400-normal {
-  font-family: "Nunito", sans-serif;
+.fredoka-400-normal {
+  font-family: "Fredoka", sans-serif;
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
 }
 
 .lora-400-normal {
@@ -82,15 +84,15 @@ body {
 
 .button {
   font-size: 1.01rem;
-  color: #33312E;
-  background-color: #A3B18A;
+  color: #F0EDE5;
+  background-color: #8A9773;
   border: none;
   border-radius: var(--textbox-border-radius);
 }
 
 .button__primary {
-  color: #4B2E2E;
-  background-color: #E1A95F;
+  color: #F9F7F3;
+  background-color: #E07A5F;
 }
 
 .chat {

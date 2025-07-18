@@ -99,8 +99,7 @@ body {
   justify-self: end;
   align-self: center;
   background-color: #3B6E4D;
-  color: #FAF7F5;
-  border-color: #FAF7F5;
+  color: #D0D0D0;
   border: solid;
 }
 
@@ -122,8 +121,8 @@ body {
 }
 
 .chat--thinking {
-  color: #FAF7F5;
-  background-color: #3B6E4D;
+  color: #D0D0D0;
+  background-color: #2F5B44;
   border-color: #2F5C40;
 }
 

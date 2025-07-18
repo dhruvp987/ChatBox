@@ -1,6 +1,6 @@
 :root {
   --max-chatbox-width: 60em;
-  --textbox-border-radius: 6px;
+  --border-radius: 6px;
 }
 
 
@@ -74,7 +74,7 @@ body {
   font-size: 1.01rem;
   color: #4B2E2E;
   background-color: #FDF4E3;
-  border-radius: var(--textbox-border-radius);
+  border-radius: var(--border-radius);
   border-color: black;
 }
 
@@ -87,7 +87,7 @@ body {
   color: #F0EDE5;
   background-color: #8A9773;
   border: none;
-  border-radius: var(--textbox-border-radius);
+  border-radius: var(--border-radius);
 }
 
 .button__primary {
@@ -95,9 +95,18 @@ body {
   background-color: #E07A5F;
 }
 
+.button__think-clsp-but {
+  justify-self: end;
+  align-self: center;
+  background-color: #3B6E4D;
+  color: #FAF7F5;
+  border-color: #FAF7F5;
+  border: solid;
+}
+
 .chat {
   margin-bottom: 1rem;
-  border-radius: var(--textbox-border-radius);
+  border-radius: var(--border-radius);
 }
 
 .chat__user {
@@ -116,4 +125,13 @@ body {
   color: #FAF7F5;
   background-color: #3B6E4D;
   border-color: #2F5C40;
+}
+
+.bar__thinking-chat {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.msg {
+  font-style: italic;
 }

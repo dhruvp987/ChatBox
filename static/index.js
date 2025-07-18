@@ -100,11 +100,11 @@ class LlmThoughtStore {
     constructor() {
 	this.topBarMsg = document.createElement('p');
 	this.topBarMsg.innerText = 'Thinking';
-	this.topBarMsg.className = 'bar-msg bar-msg__thinking-chat';
+	this.topBarMsg.className = 'msg msg__thinking-msg fredoka-400-normal';
 
 	this.topBarClspBut = document.createElement('input');
 	this.topBarClspBut.type = 'button';
-	this.topBarClspBut.className = 'bar-clsp-but bar-clsp-but__thinking-chat';
+	this.topBarClspBut.className = 'button button__think-clsp-but fredoka-400-normal';
 	this.topBarClspBut.addEventListener('click', () => {
             if (this.clspState === LlmThoughtStore.COLLAPSED) {
                 this.expand();

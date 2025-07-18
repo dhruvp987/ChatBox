@@ -4,9 +4,11 @@ const SBMT_CHAT_BTN_ID = 'submit-chat-button';
 const CNCL_CHAT_BTN_ID = 'cancel-chat-button';
 const CLR_CHAT_BTN_ID = 'clear-chat-button';
 
-const CONN_URL = 'ws://127.0.0.1:8000/connection';
-const CHAT_URL = 'ws://127.0.0.1:8000/chat';
-const CLEAR_CHAT_URL = 'http://127.0.0.1:8000/clear';
+const WINDOW_HOST = window.location.host;
+const maybeSecureS = location.protocol === 'https' ? 's' : '';
+const CONN_URL = 'ws' + maybeSecureS + '://' + WINDOW_HOST + '/connection';
+const CHAT_URL = 'ws' + maybeSecureS + '://' + WINDOW_HOST + '/chat';
+const CLEAR_CHAT_URL = 'http' + maybeSecureS + '://' + WINDOW_HOST + '/clear';
 
 const CLIENT_ID_KEY = 'clientId';
 

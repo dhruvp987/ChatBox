@@ -101,20 +101,6 @@ async def chat(ws: WebSocket):
     chats = chat_histories[payload["clientId"]]
     chats.add(Chat.USER_ROLE, payload["prompt"])
 
-    ctx = LlamaCppContext(model, MAX_CTX)
-
-    out_qu = Queue()
-
-    future = thp_exec.submit(
-        complete_chat_task,
-        ctx,
-        bytes(chat_template.render(chats), "utf-8"),
-        sampler,
-        out_qu,
-    )
-
-    chunks = []
-
     async def get_and_send_chnk():
         try:
             chnk = out_qu.get_nowait()
@@ -124,18 +110,27 @@ async def chat(ws: WebSocket):
         await asyncio.sleep(0)
         chunks.append(chnk)
 
-    try:
-        while not future.done():
-            await get_and_send_chnk()
-        while not out_qu.empty():
-            await get_and_send_chnk()
+    with LlamaCppContext(model, MAX_CTX) as ctx:
+        out_qu = Queue()
+        chunks = []
 
-        await ws.close()
-    except:
-        future.cancel()
-    finally:
-        if len(chunks) > 0:
-            chats.add(Chat.MODEL_ROLE, "".join(chunks))
+        future = thp_exec.submit(
+            complete_chat_task,
+            ctx,
+            bytes(chat_template.render(chats), "utf-8"),
+            sampler,
+            out_qu,
+        )
+
+        try:
+            while not future.done() or not out_qu.empty():
+                await get_and_send_chnk()
+            await ws.close()
+        except:
+            future.cancel()
+        finally:
+            if len(chunks) > 0:
+                chats.add(Chat.MODEL_ROLE, "".join(chunks))
 
 
 @app.post("/clear")

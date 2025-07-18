@@ -133,6 +133,9 @@ class LlamaCppContext:
             if llama_cpp.llama_decode(self._ctx, self._batch) < 0:
                 raise LlamaCppError("Could not decode generated tokens")
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
         llama_cpp.llama_free(self._ctx)
         llama_cpp.llama_batch_free(self._batch)

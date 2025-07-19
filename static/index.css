@@ -106,6 +106,7 @@ body {
 .chat {
   margin-bottom: 1rem;
   border-radius: var(--border-radius);
+  line-height: 2.0;
 }
 
 .chat__user {
@@ -129,6 +130,7 @@ body {
 .bar__thinking-chat {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  line-height: 1.0;
 }
 
 .msg {

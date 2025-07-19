@@ -57,7 +57,7 @@ samp_top_p = float(os.getenv("CB_TOP_P", "0.95"))
 lcm.llama_init()
 
 # If using fastapi dev, make sure the --no-reload option is set,
-# otherwise the LLM will be loaded multiple times and use
+# otherwise the model will be loaded multiple times and use
 # excessive resources
 model = LlamaCppModel(bytes(model_path, "utf-8"))
 

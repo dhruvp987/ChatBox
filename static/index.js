@@ -5,10 +5,10 @@ const CNCL_CHAT_BTN_ID = 'cancel-chat-button';
 const CLR_CHAT_BTN_ID = 'clear-chat-button';
 
 const WINDOW_HOST = window.location.host;
-const maybeSecureS = location.protocol === 'https' ? 's' : '';
-const CONN_URL = 'ws' + maybeSecureS + '://' + WINDOW_HOST + '/connection';
-const CHAT_URL = 'ws' + maybeSecureS + '://' + WINDOW_HOST + '/chat';
-const CLEAR_CHAT_URL = 'http' + maybeSecureS + '://' + WINDOW_HOST + '/clear';
+const MAYBE_SECURE_S = location.protocol === 'https' ? 's' : '';
+const CONN_URL = 'ws' + MAYBE_SECURE_S + '://' + WINDOW_HOST + '/connection';
+const CHAT_URL = 'ws' + MAYBE_SECURE_S + '://' + WINDOW_HOST + '/chat';
+const CLEAR_CHAT_URL = 'http' + MAYBE_SECURE_S + '://' + WINDOW_HOST + '/clear';
 
 const CLIENT_ID_KEY = 'clientId';
 

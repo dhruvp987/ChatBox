@@ -1,9 +1,9 @@
 import asyncio
+import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
 import json
 import os
-import platform
-from queue import Queue
+from queue import Queue, Empty
 import uuid
 from fastapi import (
     FastAPI,
@@ -16,6 +16,7 @@ from fastapi import (
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from threading import Event
 from typing import Annotated
 import llamacppmodel as lcm
 from llamacppmodel import LlamaCppModel, LlamaCppContext
@@ -24,10 +25,12 @@ from chat import Chat
 from chattemplate import Jinja2ChatTemplate
 
 
-def complete_chat_task(ctx, chat, sampler, out_qu):
+def complete_chat_task(ctx, chat, sampler, out_qu, cancel_evnt):
     tok_gen = ctx.complete_chat(chat, sampler)
     for chnk in tok_gen:
         out_qu.put(chnk)
+        if cancel_evnt.is_set():
+            return
 
 
 # A context window that doesn't take too much resources, making
@@ -101,18 +104,10 @@ async def chat(ws: WebSocket):
     chats = chat_histories[payload["clientId"]]
     chats.add(Chat.USER_ROLE, payload["prompt"])
 
-    async def get_and_send_chnk():
-        try:
-            chnk = out_qu.get_nowait()
-        except:
-            return
-        await ws.send_text(chnk)
-        await asyncio.sleep(0)
-        chunks.append(chnk)
-
     with LlamaCppContext(model, MAX_CTX) as ctx:
         out_qu = Queue()
         chunks = []
+        cancel_evnt = Event()
 
         future = thp_exec.submit(
             complete_chat_task,
@@ -120,14 +115,23 @@ async def chat(ws: WebSocket):
             bytes(chat_template.render(chats), "utf-8"),
             sampler,
             out_qu,
+            cancel_evnt,
         )
 
         try:
             while not future.done() or not out_qu.empty():
-                await get_and_send_chnk()
+                try:
+                    chnk = out_qu.get_nowait()
+                except Empty:
+                    continue
+                await ws.send_text(chnk)
+                await asyncio.sleep(0)
+                chunks.append(chnk)
+
             await ws.close()
         except:
-            future.cancel()
+            cancel_evnt.set()
+            concurrent.futures.wait([future])
         finally:
             if len(chunks) > 0:
                 chats.add(Chat.MODEL_ROLE, "".join(chunks))

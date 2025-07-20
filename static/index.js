@@ -65,6 +65,20 @@ function signal(signalName) {
     sigManager.signal(signalName);
 }
 
+class Iterator {
+    constructor(vals, start) {
+        this.vals = [...vals];
+	this.index = start;
+    }
+
+    next() {
+        if (this.index >= this.vals.length) {
+            this.index = 0;
+	}
+	return this.vals[this.index++];
+    }
+}
+
 class UserPromptStore {
     constructor() {
         this.store = document.createElement('div');
@@ -132,6 +146,11 @@ class LlmThoughtStore {
 
 	this.chatEndedSub = new Subscriber(() => this.finish());
 	sigSubscribe(CHAT_ENDED_SIG, this.chatEndedSub);
+
+	const thinkAniIter = new Iterator(['Thinking', 'Thinking.', 'Thinking..', 'Thinking...'], 1);
+	this.thinkAniTimer = setInterval(() => {
+            this.topBarMsg.innerText = thinkAniIter.next();
+	}, 1000);
     }
 
     fill(elem) {
@@ -151,6 +170,7 @@ class LlmThoughtStore {
     }
 
     finish() {
+	clearInterval(this.thinkAniTimer);
         this.topBarMsg.innerHTML = 'Thoughts';
 	sigUnsubscribe(CHAT_ENDED_SIG, this.chatEndedSub);
     }

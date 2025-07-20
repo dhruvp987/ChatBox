@@ -65,7 +65,7 @@ function signal(signalName) {
     sigManager.signal(signalName);
 }
 
-class Iterator {
+class CircularIterator {
     constructor(vals, start) {
         this.vals = [...vals];
 	this.index = start;
@@ -147,7 +147,7 @@ class LlmThoughtStore {
 	this.chatEndedSub = new Subscriber(() => this.finish());
 	sigSubscribe(CHAT_ENDED_SIG, this.chatEndedSub);
 
-	const thinkAniIter = new Iterator(['Thinking', 'Thinking.', 'Thinking..', 'Thinking...'], 1);
+	const thinkAniIter = new CircularIterator(['Thinking', 'Thinking.', 'Thinking..', 'Thinking...'], 1);
 	this.thinkAniTimer = setInterval(() => {
             this.topBarMsg.innerText = thinkAniIter.next();
 	}, 1000);

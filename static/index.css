@@ -106,6 +106,7 @@ body {
 .chat {
   margin-bottom: 1rem;
   border-radius: var(--border-radius);
+  border-width: 0.125em;
   line-height: 2.0;
 }
 
@@ -124,7 +125,7 @@ body {
 .chat--thinking {
   color: #D0D0D0;
   background-color: #2F5B44;
-  border-color: #2F5C40;
+  border-color: #15281E;
 }
 
 .bar__thinking-chat {

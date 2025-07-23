@@ -1,7 +1,7 @@
 # ChatBox
 Chat with local models over the web using a friendly interface.
 
-Uses llama.cpp for excellent model support and solid performance and on a wide range of hardware.
+Uses llama.cpp for excellent model support and solid performance on a wide range of hardware.
 ## Installation
 ### Prerequisites
 - uv (a Python package manager)

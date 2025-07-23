@@ -9,10 +9,10 @@ Chat with local models over the web using a friendly interface.
 2. Go to the cloned folder
 3. (If using GPU) Set your CMAKE_ARGS environment variable before building llama-cpp-python
 	- Refer to llama-cpp-python’s installation instructions to choose a backend
-	- Example: using Vulkan backend
+	- Example: using Vulkan backend with Bash
 		- `CMAKE_ARGS=“-DGGML_VULKAN=on”`
 	- *NOTE*: If using MinGW on Windows, make sure gcc and g++ are in your path and add `-G “MinGW Makefiles”` to CMAKE_ARGS
-	- Example: using MinGW and Vulkan backend
+	- Example: using MinGW and Vulkan backend with PowerShell
 		- `$env:CMAKE_ARGS = ‘-G “MinGW Makefiles” -DGGML_VULKAN=on’`
 4. Run `uv sync` to install dependencies
 	- *NOTE*: Depending on your hardware,  llama-cpp-python may take a few moments to build. This is expected, as a C++ library is being built underneath 

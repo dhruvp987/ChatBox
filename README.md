@@ -17,7 +17,7 @@ Chat with local models over the web using a friendly interface.
 4. Run `uv sync` to install dependencies
 	- *NOTE*: Depending on your hardware,  llama-cpp-python may take a few moments to build. This is expected, as a C++ library is being built underneath 
 ## Usage
-### Steps
+### Steps for Local Use
 1. Set the CB_MODEL_PATH environment variable with the path to a GGUF model
 2. Run `uv run fastapi dev —-no-reload app/main.py` to start development server
 	- *WARNING*: If using `fastapi dev`, make sure `—-no-reload` is set, or the model may be reloaded multiple times and possibly use excessive resources

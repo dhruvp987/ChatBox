@@ -18,6 +18,10 @@ const TOKENS = [THINK_TOK, THINK_END_TOK];
 
 const CHAT_ENDED_SIG = 'sigChatEnded';
 
+function renderMd(mdText) {
+    return DOMPurify.sanitize(marked.parse(mdText));
+}
+
 class Subscriber {
     constructor(callback) {
         this.callback = callback;
@@ -180,10 +184,6 @@ class LlmThoughtStore {
     }
 }
 
-function renderMd(mdText) {
-    return DOMPurify.sanitize(marked.parse(mdText));
-}
-
 class TrieNode {
     constructor() {
         this.chs = {};
@@ -312,6 +312,28 @@ connWs.onmessage = (evnt) => {
 
 let chatWs = null;
 
+function controlsWhenChatInactive(submitBut, cancelBut, prmptInput) {
+    submitBut.onclick = submit;
+    cancelChat.onclick = () => {};
+
+    submitBut.hidden = false;
+    cancelBut.hidden = true;
+
+    prmptInput.onkeydown = (evnt) => {
+        if (evnt.ctrlKey && evnt.key === 'Enter') submit();
+    }
+}
+
+function controlsWhenChatActive(submitBut, cancelBut, prmptInput) {
+    submitBut.onclick = () => {};
+    cancelBut.onclick = cancelChat;
+
+    submitBut.hidden = true;
+    cancelBut.hidden = false;
+
+    prmptInput.onkeydown = (evnt) => {};
+}
+
 function submit() {
     const userText = promptInput.value;
     const userStore = new UserPromptStore();
@@ -331,18 +353,10 @@ function submit() {
     };
     chatWs.onclose = (evnt) => {
 	signal(CHAT_ENDED_SIG);
-
-        submitChatButton.hidden = false;
-	cancelChatButton.hidden = true;
-        promptInput.onkeydown = (evnt) => {
-            if (evnt.ctrlKey && evnt.key === 'Enter') submit();
-        };
+        controlsWhenChatInactive(submitChatButton, cancelChatButton, promptInput);
     };
     chatWs.onopen = (evnt) => {
-	submitChatButton.hidden = true;
-	cancelChatButton.hidden = false;
-	promptInput.onkeydown = (evnt) => {};
-	
+	controlsWhenChatActive(submitChatButton, cancelChatButton, promptInput);
 	chatWs.send(JSON.stringify({
             clientId: sessionStorage.getItem(CLIENT_ID_KEY),
             prompt: userText
@@ -350,18 +364,15 @@ function submit() {
     };
 }
 
-cancelChatButton.onclick = () => {
+function cancelChat() {
     if (chatWs !== null) {
         chatWs.close();
 	chatWs = null;
     }
-};
+}
 
-clearChatButton.onclick = async () => {
-    if (chatWs !== null) {
-        chatWs.close();
-	chatWs = null;
-    }
+async function clearChat() {
+    cancelChat();
     await fetch(CLEAR_CHAT_URL, {
         method: 'post',
 	headers: {
@@ -369,10 +380,8 @@ clearChatButton.onclick = async () => {
 	}
     });
     chatCont.innerHTML = '';
-};
+}
 
-submitChatButton.onclick = submit;
+controlsWhenChatInactive(submitChatButton, cancelChatButton, promptInput);
 
-promptInput.onkeydown = (evnt) => {
-    if (evnt.ctrlKey && evnt.key === 'Enter') submit();
-};
+clearChatButton.onclick = clearChat;

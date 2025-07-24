@@ -312,9 +312,21 @@ connWs.onmessage = (evnt) => {
 
 let chatWs = null;
 
-function controlsWhenChatInactive(submitBut, cancelBut, prmptInput) {
+function chatOnCloseNormally() {
+    signal(CHAT_ENDED_SIG);
+    controlsWhenChatInactive(submitChatButton, cancelChatButton, clearChatButton, promptInput);
+}
+
+async function chatOnCloseByClearing() {
+    signal(CHAT_ENDED_SIG);
+    await clearChat();
+    controlsWhenChatInactive(submitChatButton, cancelChatButton, clearChatButton, promptInput);
+}
+
+function controlsWhenChatInactive(submitBut, cancelBut, clearBut, prmptInput) {
     submitBut.onclick = submit;
     cancelChat.onclick = () => {};
+    clearBut.onclick = clearChat;
 
     submitBut.hidden = false;
     cancelBut.hidden = true;
@@ -324,9 +336,10 @@ function controlsWhenChatInactive(submitBut, cancelBut, prmptInput) {
     }
 }
 
-function controlsWhenChatActive(submitBut, cancelBut, prmptInput) {
+function controlsWhenChatActive(submitBut, cancelBut, clearBut, prmptInput) {
     submitBut.onclick = () => {};
     cancelBut.onclick = cancelChat;
+    clearBut.onclick = chatClearWhenActive;
 
     submitBut.hidden = true;
     cancelBut.hidden = false;
@@ -351,12 +364,9 @@ function submit() {
         stateParser.parse(evnt.data);
 	if (atBottom) chatCont.lastElementChild.scrollIntoView(false);
     };
-    chatWs.onclose = (evnt) => {
-	signal(CHAT_ENDED_SIG);
-        controlsWhenChatInactive(submitChatButton, cancelChatButton, promptInput);
-    };
+    chatWs.onclose = chatOnCloseNormally;
     chatWs.onopen = (evnt) => {
-	controlsWhenChatActive(submitChatButton, cancelChatButton, promptInput);
+	controlsWhenChatActive(submitChatButton, cancelChatButton, clearChatButton, promptInput);
 	chatWs.send(JSON.stringify({
             clientId: sessionStorage.getItem(CLIENT_ID_KEY),
             prompt: userText
@@ -372,7 +382,6 @@ function cancelChat() {
 }
 
 async function clearChat() {
-    cancelChat();
     await fetch(CLEAR_CHAT_URL, {
         method: 'post',
 	headers: {
@@ -382,6 +391,9 @@ async function clearChat() {
     chatCont.innerHTML = '';
 }
 
-controlsWhenChatInactive(submitChatButton, cancelChatButton, promptInput);
+function chatClearWhenActive() {
+    chatWs.onclose = chatOnCloseByClearing;
+    cancelChat();
+}
 
-clearChatButton.onclick = clearChat;
+controlsWhenChatInactive(submitChatButton, cancelChatButton, clearChatButton, promptInput);

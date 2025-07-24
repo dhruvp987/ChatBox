@@ -301,6 +301,9 @@ const trie = new Trie(TOKENS);
 
 const chatCont = document.getElementById(CHAT_CONT_ID);
 const promptInput = document.getElementById(PROMPT_INPUT_ID);
+const cancelChatButton = document.getElementById(CNCL_CHAT_BTN_ID);
+const clearChatButton = document.getElementById(CLR_CHAT_BTN_ID);
+const submitChatButton = document.getElementById(SBMT_CHAT_BTN_ID);
 
 const connWs = new WebSocket(CONN_URL);
 connWs.onmessage = (evnt) => {
@@ -309,31 +312,7 @@ connWs.onmessage = (evnt) => {
 
 let chatWs = null;
 
-const cancelChatButton = document.getElementById(CNCL_CHAT_BTN_ID);
-cancelChatButton.addEventListener('click', () => {
-    if (chatWs !== null) {
-        chatWs.close();
-	chatWs = null;
-    }
-});
-
-const clearChatButton = document.getElementById(CLR_CHAT_BTN_ID);
-clearChatButton.addEventListener('click', async () => {
-    if (chatWs !== null) {
-        chatWs.close();
-	chatWs = null;
-    }
-    await fetch(CLEAR_CHAT_URL, {
-        method: 'post',
-	headers: {
-            'Authorization': sessionStorage.getItem(CLIENT_ID_KEY)
-	}
-    });
-    chatCont.innerHTML = '';
-});
-
-const submitChatButton = document.getElementById(SBMT_CHAT_BTN_ID);
-submitChatButton.addEventListener('click', () => {
+function submit() {
     const userText = promptInput.value;
     const userStore = new UserPromptStore();
     userStore.fill(renderMd(userText));
@@ -349,19 +328,51 @@ submitChatButton.addEventListener('click', () => {
         const atBottom = chatCont.scrollHeight - chatCont.clientHeight - chatCont.scrollTop <= tolerance;
         stateParser.parse(evnt.data);
 	if (atBottom) chatCont.lastElementChild.scrollIntoView(false);
-    }
+    };
     chatWs.onclose = (evnt) => {
 	signal(CHAT_ENDED_SIG);
+
         submitChatButton.hidden = false;
 	cancelChatButton.hidden = true;
-    }
+        promptInput.onkeydown = (evnt) => {
+            if (evnt.ctrlKey && evnt.key === 'Enter') submit();
+        };
+    };
     chatWs.onopen = (evnt) => {
 	submitChatButton.hidden = true;
 	cancelChatButton.hidden = false;
+	promptInput.onkeydown = (evnt) => {};
+	
 	chatWs.send(JSON.stringify({
             clientId: sessionStorage.getItem(CLIENT_ID_KEY),
             prompt: userText
         }));
-    }
-});
+    };
+}
 
+cancelChatButton.onclick = () => {
+    if (chatWs !== null) {
+        chatWs.close();
+	chatWs = null;
+    }
+};
+
+clearChatButton.onclick = async () => {
+    if (chatWs !== null) {
+        chatWs.close();
+	chatWs = null;
+    }
+    await fetch(CLEAR_CHAT_URL, {
+        method: 'post',
+	headers: {
+            'Authorization': sessionStorage.getItem(CLIENT_ID_KEY)
+	}
+    });
+    chatCont.innerHTML = '';
+};
+
+submitChatButton.onclick = submit;
+
+promptInput.onkeydown = (evnt) => {
+    if (evnt.ctrlKey && evnt.key === 'Enter') submit();
+};

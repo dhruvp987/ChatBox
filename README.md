@@ -2,6 +2,12 @@
 Chat with local models over the web using a friendly interface.
 
 Uses llama.cpp for excellent model support and solid performance on a wide range of hardware.
+
+### Demo 1: Get Rich (Qwen3 4B Unsloth Q4 GGUF with no thinking)
+https://github.com/user-attachments/assets/41e73913-5bc7-4cae-a074-566cc2eab409
+
+### Demo 2: Become U.S. President (Hugging Face SmolLM3 3B Unsloth Q6 GGUF)
+https://github.com/user-attachments/assets/3dc67ad7-8dbd-4e6c-aa73-4987f531aace
 ## Installation
 ### Prerequisites
 - uv (a Python package manager)

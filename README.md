@@ -3,12 +3,12 @@ Chat with local models over the web using a friendly interface.
 
 Uses llama.cpp for excellent model support and solid performance on a wide range of hardware.
 
-### Demo 1: Get Rich (Qwen3 4B Unsloth Q4 GGUF with no thinking)
+### Demo 1: Get Rich 💸 (Qwen3 4B Unsloth Q4 GGUF with no thinking)
 https://github.com/user-attachments/assets/41e73913-5bc7-4cae-a074-566cc2eab409
 
-### Demo 2: Become U.S. President (Hugging Face SmolLM3 3B Unsloth Q6 GGUF)
+### Demo 2: Become U.S. President 🗽 (Hugging Face SmolLM3 3B Unsloth Q6 GGUF)
 https://github.com/user-attachments/assets/3dc67ad7-8dbd-4e6c-aa73-4987f531aace
-## Installation
+## ⚡ Installation
 ### Prerequisites
 - uv (a Python package manager)
 - C/C++ compiler
@@ -24,7 +24,7 @@ https://github.com/user-attachments/assets/3dc67ad7-8dbd-4e6c-aa73-4987f531aace
 		- `$env:CMAKE_ARGS = ‘-G “MinGW Makefiles” -DGGML_VULKAN=on’`
 4. Run `uv sync` to install dependencies
 	- *NOTE*: Depending on your hardware,  llama-cpp-python may take a few moments to build. This is expected, as a C++ library is being built underneath 
-## Usage
+## 🚀 Usage
 ### Steps for Local Use
 1. Set the CB_MODEL_PATH environment variable with the path to a GGUF model
 2. Run `uv run fastapi dev —-no-reload app/main.py` to start development server
@@ -45,5 +45,5 @@ Use these variables to customize ChatBox.
 - CB_REP_PEN: Repetition Penalty (default: 1.1)
 - CB_MIN_P: min-p (default: 0.05)
 - CB_TOP_P: top-p (default: 0.95)
-## License
+## 📎 License
 Licensed under the MIT license

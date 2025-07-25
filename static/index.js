@@ -312,17 +312,6 @@ connWs.onmessage = (evnt) => {
 
 let chatWs = null;
 
-function chatOnCloseNormally() {
-    signal(CHAT_ENDED_SIG);
-    controlsWhenChatInactive(submitChatButton, cancelChatButton, clearChatButton, promptInput);
-}
-
-async function chatOnCloseByClearing() {
-    signal(CHAT_ENDED_SIG);
-    await clearChat();
-    controlsWhenChatInactive(submitChatButton, cancelChatButton, clearChatButton, promptInput);
-}
-
 function controlsWhenChatInactive(submitBut, cancelBut, clearBut, prmptInput) {
     submitBut.onclick = submit;
     cancelChat.onclick = () => {};
@@ -345,6 +334,43 @@ function controlsWhenChatActive(submitBut, cancelBut, clearBut, prmptInput) {
     cancelBut.hidden = false;
 
     prmptInput.onkeydown = (evnt) => {};
+}
+
+function captureListeners(submitBut, cancelBut, clearBut, prmptInput) {
+    const subLis = submitBut.onclick;
+    const canLis = cancelBut.onclick;
+    const clrLis = clearBut.onclick;
+    const prmLis = prmptInput.onkeydown;
+
+    submitBut.onclick = () => {};
+    cancelBut.onclick = () => {};
+    clearBut.onclick = () => {};
+    prmptInput.onkeydown = (evnt) => {};
+
+    return {
+	subLis: subLis,
+	canLis: canLis,
+	clrLis: clrLis,
+        prmLis: prmLis
+    };
+}
+
+function restoreListeners(controls, listeners) {
+    controls.subBut.onclick = listeners.subLis;
+    controls.canBut.onclick = listeners.canLis;
+    controls.clrBut.onclick = listeners.clrLis;
+    controls.prmInput.onkeydown = listeners.prmLis;
+}
+
+function chatOnCloseNormally() {
+    signal(CHAT_ENDED_SIG);
+    controlsWhenChatInactive(submitChatButton, cancelChatButton, clearChatButton, promptInput);
+}
+
+async function chatOnCloseByClearing() {
+    signal(CHAT_ENDED_SIG);
+    await clearChat();
+    controlsWhenChatInactive(submitChatButton, cancelChatButton, clearChatButton, promptInput);
 }
 
 function submit() {
@@ -382,6 +408,7 @@ function cancelChat() {
 }
 
 async function clearChat() {
+    const listeners = captureListeners(submitChatButton, cancelChatButton, clearChatButton, promptInput);
     await fetch(CLEAR_CHAT_URL, {
         method: 'post',
 	headers: {
@@ -389,9 +416,17 @@ async function clearChat() {
 	}
     });
     chatCont.innerHTML = '';
+    const controls = {
+        subBut: submitChatButton,
+	canBut: cancelChatButton,
+	clrBut: clearChatButton,
+	prmInput: promptInput
+    };
+    restoreListeners(controls, listeners);
 }
 
 function chatClearWhenActive() {
+    captureListeners(submitChatButton, cancelChatButton, clearChatButton, promptInput);
     chatWs.onclose = chatOnCloseByClearing;
     cancelChat();
 }

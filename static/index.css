@@ -84,15 +84,14 @@ body {
 
 .button {
   font-size: 1.01rem;
-  color: #F0EDE5;
-  background-color: #8A9773;
+  color: #FFFFFF;
+  background-color: #01796F;
   border: none;
   border-radius: var(--border-radius);
 }
 
 .button__primary {
-  color: #F9F7F3;
-  background-color: #E07A5F;
+  background-color: #D73C26;
 }
 
 .button__think-clsp-but {

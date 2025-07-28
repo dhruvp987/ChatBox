@@ -122,6 +122,10 @@ body {
   border-color: #3E2626;
 }
 
+.chat__llm a {
+  color: #077BFF;
+}
+
 .chat--thinking {
   color: #D0D0D0;
   background-color: #2F5B44;

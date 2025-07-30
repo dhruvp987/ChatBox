@@ -21,9 +21,9 @@ ____/______/______/______/______/_____"=.o|o_.--""___/______/______/______/____
 /______/______/______/______/______/______/______/______/______/______/[TomekK]
 *******************************************************************************
 ```
-Easily chat with local models over the web using a friendly interface.
+Easily chat with local models over the web using a friendly interface 💬.
 
-Uses llama.cpp for excellent model support and solid performance on a wide range of hardware.
+Uses llama.cpp for excellent model support and solid performance on a wide range of hardware 🦙.
 
 ### Demo 1: Get Rich 💸 (Qwen3 4B Unsloth Q4 GGUF with no thinking)
 https://github.com/user-attachments/assets/6faae2c7-c3e3-4adb-8374-6fe39c83d35d

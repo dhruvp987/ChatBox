@@ -21,7 +21,7 @@ ____/______/______/______/______/_____"=.o|o_.--""___/______/______/______/____
 /______/______/______/______/______/______/______/______/______/______/[TomekK]
 *******************************************************************************
 ```
-Chat with local models over the web using a friendly interface.
+Easily chat with local models over the web using a friendly interface.
 
 Uses llama.cpp for excellent model support and solid performance on a wide range of hardware.
 

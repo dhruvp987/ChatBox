@@ -23,7 +23,7 @@ ____/______/______/______/______/_____"=.o|o_.--""___/______/______/______/____
 ```
 Easily chat with local models over the web using a friendly interface 💬.
 
-Uses llama.cpp for excellent model support and solid performance on a wide range of hardware 🦙.
+Uses llama.cpp for excellent model support and solid performance on a wide range of hardware, lower and higher end 🦙.
 
 ### Demo 1: Get Rich 💸 (Qwen3 4B Unsloth Q4 GGUF with no thinking)
 https://github.com/user-attachments/assets/6faae2c7-c3e3-4adb-8374-6fe39c83d35d
@@ -67,5 +67,10 @@ Use these variables to customize ChatBox.
 - CB_REP_PEN: Repetition Penalty (default: 1.1)
 - CB_MIN_P: min-p (default: 0.05)
 - CB_TOP_P: top-p (default: 0.95)
+## 💻📚 Tech Stack
+- llama.cpp (using llama-cpp-python lib)
+          - Used to run local models efficiently on a variety of hardware
+- FastAPI
+          - Used to develop a performant web backend
 ## 📎 License
 Licensed under the MIT license

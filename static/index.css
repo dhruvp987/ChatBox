@@ -124,6 +124,8 @@ body {
 }
 
 .chat__user {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
   color: #D9774B;
 }
 

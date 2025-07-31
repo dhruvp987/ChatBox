@@ -90,6 +90,14 @@ body {
   border-radius: var(--border-radius);
 }
 
+.button:hover {
+  filter: brightness(106%);
+}
+
+.button:active {
+  filter: brightness(94%);
+}
+
 .button__primary {
   background-color: #D73C26;
 }

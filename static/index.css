@@ -3,6 +3,14 @@
   --border-radius: 6px;
 }
 
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
 html, body {
   display: flex;
@@ -114,6 +122,18 @@ body {
   background-color: #3B6E4D;
   color: #D0D0D0;
   border: solid;
+}
+
+.intro-message-container {
+  display: flex;
+  justify-content: center;
+}
+
+.intro-message {
+  padding-top: 2rem;
+  font-weight: bold;
+  font-size: 3rem;
+  animation: 1s ease-in 0s appear;
 }
 
 .chat {

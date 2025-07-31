@@ -297,6 +297,45 @@ class StateParser {
     }
 }
 
+class ChatContainer {
+    constructor(chatCont) {
+        this.chatCont = chatCont;
+
+	const intro = document.createElement('h2');
+	intro.className = 'intro-message lora-400-normal';
+	intro.innerText = 'What would you like to chat?';
+
+	this.introCont = document.createElement('div');
+	this.introCont.className = 'intro-message-container';
+	this.introCont.appendChild(intro);
+
+	this.empty = true;
+	this.reset();
+    }
+
+    reset() {
+        chatCont.innerHTML = '';
+	chatCont.appendChild(this.introCont);
+	this.empty = true;
+    }
+
+    appendChild(elem) {
+        if (this.empty) {
+            chatCont.innerHTML = '';
+	    this.empty = false;
+	}
+	this.chatCont.appendChild(elem);
+    }
+
+    atBottom(tolerance) {
+        return this.chatCont.scrollHeight - this.chatCont.clientHeight - this.chatCont.scrollTop <= tolerance;
+    }
+
+    scrollToBottom() {
+        this.chatCont.lastElementChild.scrollIntoView(false);
+    }
+}
+
 const trie = new Trie(TOKENS);
 
 const chatCont = document.getElementById(CHAT_CONT_ID);
@@ -304,6 +343,8 @@ const promptInput = document.getElementById(PROMPT_INPUT_ID);
 const cancelChatButton = document.getElementById(CNCL_CHAT_BTN_ID);
 const clearChatButton = document.getElementById(CLR_CHAT_BTN_ID);
 const submitChatButton = document.getElementById(SBMT_CHAT_BTN_ID);
+
+const chatContObj = new ChatContainer(chatCont);
 
 const connWs = new WebSocket(CONN_URL);
 connWs.onmessage = (evnt) => {
@@ -377,18 +418,18 @@ function submit() {
     const userText = promptInput.value;
     const userStore = new UserPromptStore();
     userStore.fill(renderMd(userText));
-    userStore.appendTo(chatCont);
+    userStore.appendTo(chatContObj);
     promptInput.value = '';
-    chatCont.lastElementChild.scrollIntoView(false);
+    chatContObj.scrollToBottom();
 
-    const stateParser = new StateParser(chatCont, new TrieIter(trie.root()));
+    const stateParser = new StateParser(chatContObj, new TrieIter(trie.root()));
 
     chatWs = new WebSocket(CHAT_URL);
     chatWs.onmessage = (evnt) => {
 	const tolerance = 25;
-        const atBottom = chatCont.scrollHeight - chatCont.clientHeight - chatCont.scrollTop <= tolerance;
+	const atBottom = chatContObj.atBottom(tolerance);
         stateParser.parse(evnt.data);
-	if (atBottom) chatCont.lastElementChild.scrollIntoView(false);
+	if (atBottom) chatContObj.scrollToBottom();
     };
     chatWs.onclose = chatOnCloseNormally;
     chatWs.onopen = (evnt) => {
@@ -415,7 +456,7 @@ async function clearChat() {
             'Authorization': sessionStorage.getItem(CLIENT_ID_KEY)
 	}
     });
-    chatCont.innerHTML = '';
+    chatContObj.reset();
     const controls = {
         subBut: submitChatButton,
 	canBut: cancelChatButton,

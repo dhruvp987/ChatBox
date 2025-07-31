@@ -74,8 +74,17 @@ body {
   font-size: 1.01rem;
   color: #4B2E2E;
   background-color: #FDF4E3;
+  border-width: 0.12rem;
   border-radius: var(--border-radius);
-  border-color: black;
+  border-color: #708090;
+}
+
+.prompt-input:hover {
+  border-color: #36454F;
+}
+
+.prompt-input:focus {
+  border-color: #000000;
 }
 
 .prompt-form-buttons {

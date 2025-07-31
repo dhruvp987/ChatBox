@@ -68,9 +68,9 @@ Use these variables to customize ChatBox.
 - CB_MIN_P: min-p (default: 0.05)
 - CB_TOP_P: top-p (default: 0.95)
 ## 💻📚 Tech Stack
-- llama.cpp (using llama-cpp-python lib)
-          - Used to run local models efficiently on a variety of hardware
+- llama.cpp (using llama-cpp-python)
+	- Used to run local models efficiently on a variety of hardware
 - FastAPI
-          - Used to develop a performant web backend
+  	- Used to develop a performant web backend
 ## 📎 License
 Licensed under the MIT license

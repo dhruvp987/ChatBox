@@ -74,16 +74,13 @@ body {
   font-size: 1.01rem;
   color: #4B2E2E;
   background-color: #FDF4E3;
-  border-width: 0.12rem;
+  border-width: 3px;
   border-radius: var(--border-radius);
   border-color: #708090;
+  transition: border-color 0.2s;
 }
 
-.prompt-input:hover {
-  border-color: #36454F;
-}
-
-.prompt-input:focus {
+.prompt-input:hover, .prompt-input:focus {
   border-color: #000000;
 }
 

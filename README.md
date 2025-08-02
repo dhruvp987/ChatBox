@@ -58,7 +58,8 @@ Use these variables to customize ChatBox.
 - CB_MODEL_PATH: Path to a GGUF model
 
 ***Context Options***
-- CB_CTX_SIZE: Context size (default: 4096)
+- CB_CTX_SIZE: Context window size (default: 4096)
+- CB_BATCH_SIZE: Prompt batch size (default: 512)
 
 ***Sampler Options***
 - CB_TEMP: Temperature (default: 0.8)

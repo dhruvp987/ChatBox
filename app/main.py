@@ -47,6 +47,7 @@ if not os.path.isfile(model_path):
     raise FileNotFoundError("model path is invalid or does not lead to a file")
 
 ctx_size = int(os.getenv("CB_CTX_SIZE", "4096"))
+batch_size = int(os.getenv("CB_BATCH_SIZE", "512"))
 
 samp_temp = float(os.getenv("CB_TEMP", "0.8"))
 samp_top_k = int(os.getenv("CB_TOP_K", "40"))
@@ -102,7 +103,7 @@ async def chat(ws: WebSocket):
     chats = chat_histories[payload["clientId"]]
     chats.add(Chat.USER_ROLE, payload["prompt"])
 
-    with LlamaCppContext(model, ctx_size) as ctx:
+    with LlamaCppContext(model, ctx_size, batch_size) as ctx:
         out_qu = Queue()
         chunks = []
         cancel_evnt = Event()

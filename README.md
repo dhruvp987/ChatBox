@@ -51,6 +51,10 @@ https://github.com/user-attachments/assets/20bc9eb8-cbe6-4680-a8f9-e4d04a72f7d2
 2. Run `uv run fastapi dev —-no-reload app/main.py` to start development server
 	- *WARNING*: If using `fastapi dev`, make sure `—-no-reload` is set, or the model may be reloaded multiple times and possibly use excessive resources
 3. Visit http://127.0.0.1:8000/ (or the URL FastAPI specifies)
+### Steps for Production Use
+1. Set the CB_MODEL_PATH environment variable with the path to a GGUF model
+2. Run `uv run fastapi run app/main.py` to start production server
+3. FastAPI will be listening to the network. Go to {Your URL}/ to visit the website
 ### Environment Variables
 Use these variables to customize ChatBox.
 

@@ -32,7 +32,7 @@ https://github.com/user-attachments/assets/20bc9eb8-cbe6-4680-a8f9-e4d04a72f7d2
 ## ⚡ Installation
 ### Prerequisites
 - uv (a Python package manager)
-- C/C++ compiler
+- C/C++ compiler that supports C++17
 ### Steps
 1. Clone the repository to a folder on your system
 2. Go to the cloned folder

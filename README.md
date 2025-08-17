@@ -44,6 +44,9 @@ https://github.com/user-attachments/assets/20bc9eb8-cbe6-4680-a8f9-e4d04a72f7d2
 	- Example: using MinGW and Vulkan backend with PowerShell
 		- `$env:CMAKE_ARGS = ‘-G “MinGW Makefiles” -DGGML_VULKAN=on’`
 4. Run `uv sync` to install dependencies
+    - *NOTE*: If you skipped Step 3 and are using MinGW on Windows, make sure gcc and g++ are in your path and add `-G “MinGW Makefiles”` to the CMAKE_ARGS environment variable before running `uv sync`
+    - Example: using MinGW and PowerShell
+        - `$env:CMAKE_ARGS = ‘-G “MinGW Makefiles”’`
 	- *NOTE*: Depending on your hardware,  llama-cpp-python may take a few moments to build. This is expected, as a C++ library is being built underneath 
 ## 🚀 Usage
 ### Steps for Local Use

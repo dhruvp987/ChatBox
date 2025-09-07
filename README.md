@@ -25,10 +25,11 @@ Easily chat with local, powerful, and private models over the web using a friend
 
 Uses llama.cpp for excellent model support and solid performance on a wide range of hardware, lower and higher end 🦙.
 
-### Demo 1: Get Rich 💸 (Qwen3 4B Unsloth Q4 GGUF with no thinking)
-https://github.com/user-attachments/assets/96375c68-7174-4376-8e31-534a96fd145b
-### Demo 2: Become U.S. President 🗽 (Hugging Face SmolLM3 3B Unsloth Q6 GGUF)
-https://github.com/user-attachments/assets/20bc9eb8-cbe6-4680-a8f9-e4d04a72f7d2
+### YouTube Demo: Get Rich 💸 with Qwen3 0.6B Unsloth Q4
+Click image to watch
+
+[![ChatBox](https://img.youtube.com/vi/gLF85WsAwoA/0.jpg)](https://www.youtube.com/watch?v=gLF85WsAwoA)
+
 ## ⚡ Installation
 ### Prerequisites
 - uv (a Python package manager)

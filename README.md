@@ -30,6 +30,11 @@ Click image to watch
 
 [![ChatBox](https://img.youtube.com/vi/gLF85WsAwoA/0.jpg)](https://www.youtube.com/watch?v=gLF85WsAwoA)
 
+## 💻📚 Tech Stack
+- Python, FastAPI, llama.cpp (using llama-cpp-python)
+	- Used to run local models efficiently on a variety of hardware and serve the web app
+ - HTML, CSS, JavaScript
+   - Used to build an intuitive UI
 ## ⚡ Installation
 ### Prerequisites
 - uv (a Python package manager)
@@ -75,10 +80,5 @@ Use these variables to customize ChatBox.
 - CB_REP_PEN: Repetition Penalty (default: 1.1)
 - CB_MIN_P: min-p (default: 0.05)
 - CB_TOP_P: top-p (default: 0.95)
-## 💻📚 Tech Stack
-- llama.cpp (using llama-cpp-python)
-	- Used to run local models efficiently on a variety of hardware
-- FastAPI
-  	- Used to develop a performant web backend
 ## 📎 License
 Licensed under the MIT license

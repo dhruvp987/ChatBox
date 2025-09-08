@@ -25,7 +25,7 @@ Easily chat with local, powerful, and private models over the web using a friend
 
 Uses llama.cpp for excellent model support and solid performance on a wide range of hardware, lower and higher end 🦙.
 
-### YouTube Demo: Get Rich 💸 with Qwen3 0.6B Unsloth Q4
+### YouTube Demo: Get Rich 💸 with Qwen3 0.6B Unsloth Q4 on Azure
 Click image to watch
 
 [![ChatBox](https://img.youtube.com/vi/gLF85WsAwoA/0.jpg)](https://www.youtube.com/watch?v=gLF85WsAwoA)

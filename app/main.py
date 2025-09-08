@@ -25,6 +25,9 @@ from chat import Chat
 from chattemplate import Jinja2ChatTemplate
 
 
+N_CORES = os.cpu_count()
+
+
 def complete_chat_task(ctx, chat, sampler, out_qu, cancel_evnt):
     tok_gen = ctx.complete_chat(chat, sampler)
     for chnk in tok_gen:
@@ -103,7 +106,7 @@ async def chat(ws: WebSocket):
     chats = chat_histories[payload["clientId"]]
     chats.add(Chat.USER_ROLE, payload["prompt"])
 
-    with LlamaCppContext(model, ctx_size, batch_size) as ctx:
+    with LlamaCppContext(model, ctx_size, batch_size, N_CORES, N_CORES) as ctx:
         out_qu = Queue()
         chunks = []
         cancel_evnt = Event()

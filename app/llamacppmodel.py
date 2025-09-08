@@ -55,7 +55,15 @@ class LlamaCppModel:
 
 
 class LlamaCppContext:
-    def __init__(self, model, n_ctx=4096, n_batch=512, offload_kqv=True):
+    def __init__(
+        self,
+        model,
+        n_ctx=4096,
+        n_batch=512,
+        n_threads=2,
+        n_threads_batch=2,
+        offload_kqv=True,
+    ):
         self._model = model
         self._n_ctx = n_ctx
         self._n_batch = n_batch
@@ -64,6 +72,8 @@ class LlamaCppContext:
         ctx_params.n_ctx = n_ctx
         ctx_params.n_batch = n_batch
         ctx_params.n_ubatch = n_batch
+        ctx_params.n_threads = n_threads
+        ctx_params.n_threads_batch = n_threads_batch
         ctx_params.offload_kqv = offload_kqv
 
         self._ctx = llama_cpp.llama_new_context_with_model(model.model, ctx_params)
